@@ -26,14 +26,14 @@ impl Board {
     }
 
     // TODO: implement
-    pub fn spawn(&mut self) {
-        todo!();
+    pub fn spawn(&mut self) -> Result<(), ()> {
+        self.spawn_at(0, 0)
     }
 
-    fn spawn_at(&mut self, col: usize, row: usize) {
+    fn spawn_at(&mut self, col: usize, row: usize) -> Result<(), ()> {
         assert!(col < BOARD_HEIGHT);
         assert!(row < BOARD_WIDTH);
-        self.grid[row][col].spawn();
+        self.grid[row][col].spawn()
     }
 }
 

@@ -15,6 +15,8 @@ fn main() {
     board.shift(Direction::Left);
     board.shift(Direction::Right);
 
+    board.spawn().unwrap();
+
     println!("{}", board.to_string());
 
     println!("CELL TEST");
@@ -22,7 +24,7 @@ fn main() {
     let mut cell = Cell::new();
     println!("empty: {}", cell.to_string());
 
-    cell.spawn();
+    cell.spawn().unwrap();
     println!("spawn: {}", cell.to_string());
 
     cell.grow();

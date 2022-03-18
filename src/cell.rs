@@ -17,9 +17,17 @@ impl Cell {
         self.value <<= 1;
     }
 
+    pub fn spawn(&mut self) -> Result<(), ()> {
+        if self.value == 0 {
+            self.value = self.spawn_value();
+            return Ok(());
+        }
+        Err(())
+    }
+
     // TODO: make 4's spawn with chance 10%
-    pub fn spawn(&mut self) {
-        self.value = 2;
+    fn spawn_value(&self) -> usize {
+        2
     }
 }
 
@@ -42,7 +50,7 @@ mod tests {
     #[test]
     fn spawn() {
         let mut cell = Cell::new();
-        cell.spawn();
+        cell.spawn().unwrap();
 
         let val = cell.value();
         assert!(val == 2 || val == 4);
@@ -51,11 +59,11 @@ mod tests {
     #[test]
     fn grow() {
         let mut cell = Cell::new();
-        cell.spawn();
+        cell.spawn().unwrap();
+
         let val = cell.value();
         cell.grow();
 
         assert_eq!(val * 2, cell.value());
     }
-
 }
