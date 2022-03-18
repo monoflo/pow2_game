@@ -1,6 +1,3 @@
-use std::fmt;
-
-
 #[derive(Copy, Clone, Debug)]
 pub struct Cell {
     value: usize,
@@ -25,8 +22,8 @@ impl Cell {
     }
 }
 
-impl fmt::Display for Cell {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for Cell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.value)
     }
 }

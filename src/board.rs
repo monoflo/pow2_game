@@ -1,5 +1,3 @@
-use std::fmt;
-
 use crate::{Cell,Direction};
 
 const BOARD_HEIGHT: usize = 4;
@@ -34,8 +32,8 @@ impl Board {
 }
 
 // TODO: implement
-impl fmt::Display for Board {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.grid)
     }
 }
