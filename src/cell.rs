@@ -27,3 +27,34 @@ impl std::fmt::Display for Cell {
         write!(f, "{}", self.value)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init() {
+        let cell = Cell::new();
+        assert_eq!(0, cell.value());
+    }
+
+    #[test]
+    fn spawn() {
+        let mut cell = Cell::new();
+        cell.spawn();
+
+        let val = cell.value();
+        assert!(val == 2 || val == 4);
+    }
+
+    #[test]
+    fn grow() {
+        let mut cell = Cell::new();
+        cell.spawn();
+        let val = cell.value();
+        cell.grow();
+
+        assert_eq!(val * 2, cell.value());
+    }
+
+}
