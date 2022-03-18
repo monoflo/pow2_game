@@ -29,6 +29,12 @@ impl Board {
     pub fn spawn(&mut self) {
         todo!();
     }
+
+    fn spawn_at(&mut self, col: usize, row: usize) {
+        assert!(col < BOARD_HEIGHT);
+        assert!(row < BOARD_WIDTH);
+        self.grid[row][col].spawn();
+    }
 }
 
 impl std::fmt::Display for Board {
