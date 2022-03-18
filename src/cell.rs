@@ -13,6 +13,7 @@ impl Cell {
     }
 
     pub fn grow(&mut self) {
+        assert_ne!(0, self.value);
         self.value <<= 1;
     }
 
