@@ -31,9 +31,19 @@ impl Board {
     }
 }
 
-// TODO: implement
+// TODO: remove extra trailing space
 impl std::fmt::Display for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self.grid)
+        let mut result = String::new();
+
+        for row in self.grid {
+            for cell in row {
+                result += &cell.to_string();
+                result += " ";
+            }
+            result += "\n";
+        }
+
+        write!(f, "{}", result)
     }
 }
