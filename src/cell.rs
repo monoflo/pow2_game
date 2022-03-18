@@ -57,6 +57,13 @@ mod tests {
     }
 
     #[test]
+    fn double_spawn() {
+        let mut cell = Cell::new();
+        cell.spawn().unwrap();
+        cell.spawn().unwrap_err();
+    }
+
+    #[test]
     fn grow() {
         let mut cell = Cell::new();
         cell.spawn().unwrap();
