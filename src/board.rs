@@ -27,10 +27,10 @@ impl Board {
     pub fn shift(&mut self, dir: Direction) {
         // TODO: implement
         match dir {
-            Direction::Down => println!("down"),
-            Direction::Left => println!("left"),
-            Direction::Right => println!("right"),
-            Direction::Up => println!("up"),
+            Direction::Down => todo!(),
+            Direction::Left => todo!(),
+            Direction::Right => todo!(),
+            Direction::Up => todo!(),
         }
     }
 
