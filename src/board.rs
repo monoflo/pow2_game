@@ -1,10 +1,9 @@
-use crate::{Cell,Direction};
+use crate::{Cell, Direction};
 
 /// Defines the height of the board.
 const BOARD_HEIGHT: usize = 4;
 /// Defines the width of the board.
 const BOARD_WIDTH: usize = 4;
-
 
 /// The representation of a game board.
 pub struct Board {
@@ -62,7 +61,7 @@ impl std::fmt::Display for Board {
             result += &row
                 .iter()
                 .map(|cell| cell.to_string())
-                .reduce(|a, b| {a + " " + &b})
+                .reduce(|a, b| a + " " + &b)
                 .unwrap();
 
             result += "\n";

@@ -6,7 +6,6 @@ use board::Board;
 use cell::Cell;
 use direction::Direction;
 
-
 fn main() {
     println!("BOARD TEST");
     let mut board = Board::new();
