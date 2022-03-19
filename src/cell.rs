@@ -23,13 +23,13 @@ impl Cell {
 
     /// Merge the current cell with another.
     /// If successful, `self` will grow while the `other` will be despawned.
-    /// Fails if the cell values are not equal to each other.
+    /// Fails if the cell values are not equal to each other or if one is empty.
     ///
     /// # Arguments
     ///
     /// * `other` - the other cell to merge with (that will be despawned)
     pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
-        if self.value != other.value {
+        if self.is_empty() || self.value != other.value {
             return Err(());
         }
 
