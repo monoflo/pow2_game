@@ -193,7 +193,12 @@ mod tests {
 
     #[test]
     fn merge_with_unequal() {
-        // TODO: implement once the spawn value of a cell can be four
-        todo!();
+        let mut merger = Cell::new();
+        let mut mergee = Cell::new();
+
+        merger.value = 2;
+        mergee.value = 4;
+
+        mergee.merge(&mut merger).unwrap_err();
     }
 }
