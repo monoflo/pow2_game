@@ -11,6 +11,11 @@ impl Cell {
         Self { value: 0 }
     }
 
+    /// Returns whether the cell is empty.
+    pub fn is_empty(&self) -> bool {
+        self.value == 0
+    }
+
     /// Returns the value held by the cell.
     pub fn value(&self) -> usize {
         self.value
