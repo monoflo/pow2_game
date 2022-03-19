@@ -112,6 +112,17 @@ mod tests {
     }
 
     #[test]
+    fn despawn() {
+        let mut cell = Cell::new();
+
+        cell.spawn().unwrap();
+        assert_ne!(0, cell.value);
+
+        cell.despawn();
+        assert_eq!(0, cell.value);
+    }
+
+    #[test]
     fn merge_both_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
