@@ -76,15 +76,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn init() {
+    /// Affirm that `Board::new()` initializes a board with all cells having `value = 0`.
+    fn new() {
         let board = Board::new();
-        let all_empty = board
+        assert!(board
             .grid
             .iter()
             .flat_map(|row| row.iter())
-            .map(|cell| cell.is_empty())
-            .reduce(|a, b| a && b)
-            .unwrap();
-        assert!(all_empty);
+            .all(|cell| cell.is_empty()));
     }
 }
