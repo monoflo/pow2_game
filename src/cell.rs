@@ -21,7 +21,25 @@ impl Cell {
         self.value
     }
 
-    /// Attempts to spawn a new value for the cell.
+    /// Merge the current cell with another.
+    /// If successful, `self` will grow while the `other` will be despawned.
+    /// Fails if the cell values are not equal to each other.
+    ///
+    /// # Arguments
+    ///
+    /// * `other` - the other cell to merge with (that will be despawned)
+    pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
+        if self.value != other.value {
+            return Err(());
+        }
+
+        self.grow();
+        other.despawn();
+
+        Ok(())
+    }
+
+    /// Attempts to spawn a non-empty cell.
     /// Fails if the cell already stores a non-zero value.
     pub fn spawn(&mut self) -> Result<(), ()> {
         if self.value == 0 {
@@ -36,6 +54,11 @@ impl Cell {
     fn spawn_value(&self) -> usize {
         // TODO: make 4's spawn with chance 10%
         2
+    }
+
+    /// Reverts the cell back to an empty state.
+    fn despawn(&mut self) {
+        self.value = 0;
     }
 
     /// Increases the value of the cell by a power of two.
