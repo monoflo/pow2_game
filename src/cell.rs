@@ -81,7 +81,7 @@ mod tests {
     #[test]
     fn init() {
         let cell = Cell::new();
-        assert_eq!(0, cell.value());
+        assert_eq!(0, cell.value);
     }
 
     #[test]
@@ -89,7 +89,7 @@ mod tests {
         let mut cell = Cell::new();
         cell.spawn().unwrap();
 
-        let val = cell.value();
+        let val = cell.value;
         assert!(val == 2 || val == 4);
     }
 
@@ -105,10 +105,10 @@ mod tests {
         let mut cell = Cell::new();
         cell.spawn().unwrap();
 
-        let val = cell.value();
+        let val = cell.value;
         cell.grow();
 
-        assert_eq!(val * 2, cell.value());
+        assert_eq!(val * 2, cell.value);
     }
 
     #[test]
@@ -159,28 +159,28 @@ mod tests {
         mergee.spawn();
 
         // ensure merger's value is two (most likely value)
-        while merger.value() != 2 {
+        while merger.value != 2 {
             merger.despawn();
             merger.spawn();
         }
 
         // ensure mergee's value is equal to merger's
-        while mergee.value() != merger.value() {
+        while mergee.value != merger.value {
             merger.despawn();
             merger.spawn();
         }
 
         // record value of mergee before merge
-        let val = mergee.value();
+        let val = mergee.value;
 
         // merge cells
         mergee.merge(&mut merger).unwrap();
 
         // ensure that the mergee has grown
-        assert_eq!(val * 2, mergee.value());
+        assert_eq!(val * 2, mergee.value);
 
         // ensure that the merger has despawned
-        assert_eq!(0, merger.value());
+        assert_eq!(0, merger.value);
     }
 
     #[test]
