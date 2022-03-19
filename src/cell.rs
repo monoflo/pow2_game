@@ -87,21 +87,34 @@ mod tests {
     use super::*;
 
     #[test]
-    fn init() {
+    /// Affirm that `Cell::new()` initializes cells with `value = 0`.
+    fn new() {
         let cell = Cell::new();
         assert_eq!(0, cell.value);
     }
 
     #[test]
+    /// Affirm that `Cell::spawn()` can initialize the cell `value` to both two and four.
     fn spawn() {
         let mut cell = Cell::new();
         cell.spawn().unwrap();
 
+        // test first value
         let val = cell.value;
+        assert!(val == 2 || val == 4);
+
+        // spawn until other value is reached
+        while val == cell.value {
+            cell.despawn();
+            cell.spawn().unwrap();
+        }
+
+        // test other value
         assert!(val == 2 || val == 4);
     }
 
     #[test]
+    /// Affirm that `Cell::spawn()` will result in an error if the cell has already been spawned.
     fn double_spawn() {
         let mut cell = Cell::new();
         cell.spawn().unwrap();
@@ -109,96 +122,73 @@ mod tests {
     }
 
     #[test]
+    /// Affirm that `Cell::grow()` will double the `value` of the cell.
     fn grow() {
-        let mut cell = Cell::new();
-        cell.spawn().unwrap();
-
-        let val = cell.value;
+        let mut cell = Cell { value: 2 };
         cell.grow();
-
-        assert_eq!(val * 2, cell.value);
+        assert_eq!(4, cell.value);
+        cell.value = 8;
+        cell.grow();
+        assert_eq!(16, cell.value);
+        cell.value = 32;
+        cell.grow();
+        assert_eq!(64, cell.value);
     }
 
     #[test]
+    /// Affirm that `Cell::despawn()` will reset the `value` of the cell to zero.
     fn despawn() {
-        let mut cell = Cell::new();
-
-        cell.spawn().unwrap();
-        assert_ne!(0, cell.value);
-
+        let mut cell = Cell { value: 2 };
         cell.despawn();
         assert_eq!(0, cell.value);
     }
 
     #[test]
+    /// Affirm that an error will occur if `Cell::merge()` is performed on two cells that are both
+    /// empty.
     fn merge_both_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
-
         mergee.merge(&mut merger).unwrap_err();
     }
 
     #[test]
+    /// Affirm that an error will occur if `Cell::merge()` is performed *on* a cell that has not
+    /// been spawned.
     fn merge_as_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
-
         merger.spawn();
-
         mergee.merge(&mut merger).unwrap_err();
     }
 
     #[test]
+    /// Affirm that an error will occur if `Cell::merge()` is performed *against* a cell that has
+    /// not been spawned.
     fn merge_with_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
-
         mergee.spawn();
-
         mergee.merge(&mut merger).unwrap_err();
     }
 
     #[test]
+    /// Affirm that `Cell::merge()` will succeed when performed on two cells of equal `value`, and
+    /// also that their `value`s will update appropriately.
     fn merge_with_equal() {
-        let mut merger = Cell::new();
-        let mut mergee = Cell::new();
-
-        merger.spawn();
-        mergee.spawn();
-
-        // ensure merger's value is two (most likely value)
-        while merger.value != 2 {
-            merger.despawn();
-            merger.spawn();
-        }
-
-        // ensure mergee's value is equal to merger's
-        while mergee.value != merger.value {
-            merger.despawn();
-            merger.spawn();
-        }
-
-        // record value of mergee before merge
-        let val = mergee.value;
-
-        // merge cells
+        let mut merger = Cell { value: 2 };
+        let mut mergee = Cell { value: 2 };
         mergee.merge(&mut merger).unwrap();
-
-        // ensure that the mergee has grown
-        assert_eq!(val * 2, mergee.value);
-
-        // ensure that the merger has despawned
+        assert_eq!(4, mergee.value);
         assert_eq!(0, merger.value);
     }
 
     #[test]
+    /// Affirm that an error will occur if `Cell::merge()` is performed on two cells of unequal
+    /// `value`.
     fn merge_with_unequal() {
-        let mut merger = Cell::new();
-        let mut mergee = Cell::new();
-
-        merger.value = 2;
-        mergee.value = 4;
-
+        let mut merger = Cell { value: 2 };
+        let mut mergee = Cell { value: 4 };
         mergee.merge(&mut merger).unwrap_err();
     }
 }
