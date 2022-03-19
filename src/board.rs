@@ -70,3 +70,21 @@ impl std::fmt::Display for Board {
         write!(f, "{}", result)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn init() {
+        let board = Board::new();
+        let all_empty = board
+            .grid
+            .iter()
+            .flat_map(|row| row.iter())
+            .map(|cell| cell.is_empty())
+            .reduce(|a, b| a && b)
+            .unwrap();
+        assert!(all_empty);
+    }
+}
