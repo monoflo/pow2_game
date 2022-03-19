@@ -110,4 +110,71 @@ mod tests {
 
         assert_eq!(val * 2, cell.value());
     }
+
+    #[test]
+    fn merge_both_empty() {
+        let mut merger = Cell::new();
+        let mut mergee = Cell::new();
+
+        mergee.merge(&mut merger).unwrap_err();
+    }
+
+    #[test]
+    fn merge_as_empty() {
+        let mut merger = Cell::new();
+        let mut mergee = Cell::new();
+
+        merger.spawn();
+
+        mergee.merge(&mut merger).unwrap_err();
+    }
+
+    #[test]
+    fn merge_with_empty() {
+        let mut merger = Cell::new();
+        let mut mergee = Cell::new();
+
+        mergee.spawn();
+
+        mergee.merge(&mut merger).unwrap_err();
+    }
+
+    #[test]
+    fn merge_with_equal() {
+        let mut merger = Cell::new();
+        let mut mergee = Cell::new();
+
+        merger.spawn();
+        mergee.spawn();
+
+        // ensure merger's value is two (most likely value)
+        while merger.value() != 2 {
+            merger.despawn();
+            merger.spawn();
+        }
+
+        // ensure mergee's value is equal to merger's
+        while mergee.value() != merger.value() {
+            merger.despawn();
+            merger.spawn();
+        }
+
+        // record value of mergee before merge
+        let val = mergee.value();
+
+        // merge cells
+        mergee.merge(&mut merger).unwrap();
+
+        // ensure that the mergee has grown
+        assert_eq!(val * 2, mergee.value());
+
+        // ensure that the merger has despawned
+        assert_eq!(0, merger.value());
+    }
+
+    #[test]
+    fn merge_with_unequal() {
+        // TODO: implement once the spawn value of a cell can be four
+        todo!();
+    }
 }
