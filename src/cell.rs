@@ -21,12 +21,6 @@ impl Cell {
         self.value
     }
 
-    /// Increases the value of the cell by a power of two.
-    pub fn grow(&mut self) {
-        assert_ne!(0, self.value);
-        self.value <<= 1;
-    }
-
     /// Attempts to spawn a new value for the cell.
     /// Fails if the cell already stores a non-zero value.
     pub fn spawn(&mut self) -> Result<(), ()> {
@@ -42,6 +36,12 @@ impl Cell {
     fn spawn_value(&self) -> usize {
         // TODO: make 4's spawn with chance 10%
         2
+    }
+
+    /// Increases the value of the cell by a power of two.
+    fn grow(&mut self) {
+        assert_ne!(0, self.value);
+        self.value <<= 1;
     }
 }
 
