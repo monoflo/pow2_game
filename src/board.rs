@@ -52,14 +52,18 @@ impl Board {
         self.grid[row][col].spawn()
     }
 
-    fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = usize> + '_ {
+    fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = (usize, usize)> + '_ {
         assert!(col < BOARD_COLS);
-        (0..BOARD_ROWS).filter(move |row| self.grid[*row][col].is_empty())
+        (0..BOARD_ROWS)
+            .filter(move |row| self.grid[*row][col].is_empty())
+            .map(move |row| (row, col))
     }
 
-    fn get_empty_cells_row(&self, row: usize) -> impl Iterator<Item = usize> + '_ {
+    fn get_empty_cells_row(&self, row: usize) -> impl Iterator<Item = (usize, usize)> + '_ {
         assert!(row < BOARD_ROWS);
-        (0..BOARD_COLS).filter(move |col| self.grid[row][*col].is_empty())
+        (0..BOARD_COLS)
+            .filter(move |col| self.grid[row][*col].is_empty())
+            .map(move |col| (row, col))
     }
 }
 
