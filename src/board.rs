@@ -51,27 +51,55 @@ impl Board {
         self.grid[pos.row][pos.col].spawn()
     }
 
-    fn get_empty_cells_board(&self) -> impl Iterator<Item = Coordinate> + '_ {
+    /// Retrieves all cells matching the specified emptiness.
+    ///
+    /// # Arguments
+    ///
+    /// * `is_empty` - whether the cell should be empty; search criteria
+    fn get_cells_by_emptiness_board(
+        &self,
+        is_empty: bool,
+    ) -> impl Iterator<Item = Coordinate> + '_ {
         (0..BOARD_ROWS)
             .zip(0..BOARD_COLS)
-            .filter(move |pos| self.grid[pos.0][pos.1].is_empty())
+            .filter(move |pos| is_empty == self.grid[pos.0][pos.1].is_empty())
             .map(move |pos| Coordinate {
                 row: pos.0,
                 col: pos.1,
             })
     }
 
-    fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = Coordinate> + '_ {
+    /// Retrieves cells in the given col matching the specified emptiness.
+    ///
+    /// # Arguments
+    ///
+    /// * `is_empty` - whether the cell should be empty; search criteria
+    /// * `col` - the board col in which to search
+    fn get_cells_by_emptiness_col(
+        &self,
+        is_empty: bool,
+        col: usize,
+    ) -> impl Iterator<Item = Coordinate> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
-            .filter(move |row| self.grid[*row][col].is_empty())
+            .filter(move |row| is_empty == self.grid[*row][col].is_empty())
             .map(move |row| Coordinate { row, col })
     }
 
-    fn get_empty_cells_row(&self, row: usize) -> impl Iterator<Item = Coordinate> + '_ {
+    /// Retrieves cells in the given row matching the specified emptiness.
+    ///
+    /// # Arguments
+    ///
+    /// * `is_empty` - whether the cell should be empty; search criteria
+    /// * `row` - the board row in which to search
+    fn get_cells_by_emptiness_row(
+        &self,
+        is_empty: bool,
+        row: usize,
+    ) -> impl Iterator<Item = Coordinate> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
-            .filter(move |col| self.grid[row][*col].is_empty())
+            .filter(move |col| is_empty == self.grid[row][*col].is_empty())
             .map(move |col| Coordinate { row, col })
     }
 }
