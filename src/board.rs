@@ -51,6 +51,16 @@ impl Board {
         self.grid[pos.row][pos.col].spawn()
     }
 
+    fn get_empty_cells_board(&self) -> impl Iterator<Item = Coordinate> + '_ {
+        (0..BOARD_ROWS)
+            .zip(0..BOARD_COLS)
+            .filter(move |pos| self.grid[pos.0][pos.1].is_empty())
+            .map(move |pos| Coordinate {
+                row: pos.0,
+                col: pos.1,
+            })
+    }
+
     fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = Coordinate> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
