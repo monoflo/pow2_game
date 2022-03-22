@@ -1,4 +1,4 @@
-use crate::{Cell, Direction};
+use crate::{Cell, Coordinate, Direction};
 
 /// Defines the number of columns in the board.
 const BOARD_COLS: usize = 4;
@@ -37,33 +37,32 @@ impl Board {
     /// Spawns a new cell on the game board.
     pub fn spawn(&mut self) -> Result<(), ()> {
         // TODO: implement
-        self.spawn_at(0, 0)
+        self.spawn_at(Coordinate { row: 0, col: 0 })
     }
 
     /// Spawns a new cell on the game board at the specified location.
     ///
     /// # Arguments
     ///
-    /// * `col` - the grid column at which to spawn
-    /// * `row` - the grid row at which to spawn
-    fn spawn_at(&mut self, col: usize, row: usize) -> Result<(), ()> {
-        assert!(col < BOARD_COLS);
-        assert!(row < BOARD_ROWS);
-        self.grid[row][col].spawn()
+    /// * `pos` - the grid coordinate at which to spawn
+    fn spawn_at(&mut self, pos: Coordinate) -> Result<(), ()> {
+        assert!(pos.col < BOARD_COLS);
+        assert!(pos.row < BOARD_ROWS);
+        self.grid[pos.row][pos.col].spawn()
     }
 
-    fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = (usize, usize)> + '_ {
+    fn get_empty_cells_col(&self, col: usize) -> impl Iterator<Item = Coordinate> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
             .filter(move |row| self.grid[*row][col].is_empty())
-            .map(move |row| (row, col))
+            .map(move |row| Coordinate { row, col })
     }
 
-    fn get_empty_cells_row(&self, row: usize) -> impl Iterator<Item = (usize, usize)> + '_ {
+    fn get_empty_cells_row(&self, row: usize) -> impl Iterator<Item = Coordinate> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
             .filter(move |col| self.grid[row][*col].is_empty())
-            .map(move |col| (row, col))
+            .map(move |col| Coordinate { row, col })
     }
 }
 
