@@ -138,9 +138,9 @@ mod tests {
     use super::*;
 
     #[test]
-    /// Affirm that `Board::new()` initializes a board with all cells having `value = 0`.
-    fn new() {
-        let board = Board::new();
+    /// Affirm that `Board::empty()` initializes a board with all cells having `value = 0`.
+    fn empty() {
+        let board = Board::empty();
         assert!(board
             .grid
             .iter()
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn spawn_at_invalid_col() {
-        let mut board = Board::new();
+        let mut board = Board::empty();
         board.spawn_at(Coordinate {
             row: 0,
             col: usize::MAX,
@@ -161,7 +161,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn spawn_at_invalid_row() {
-        let mut board = Board::new();
+        let mut board = Board::empty();
         board.spawn_at(Coordinate {
             row: usize::MAX,
             col: 0,
@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn spawn_at_0_0() {
-        let mut board = Board::new();
+        let mut board = Board::empty();
         board.spawn_at(Coordinate { row: 0, col: 0 }).unwrap();
         let mut cells = board.grid.iter().flat_map(|row| row.iter());
         assert!(!cells.next().unwrap().is_empty());
@@ -179,7 +179,7 @@ mod tests {
 
     #[test]
     fn spawn_at_end_end() {
-        let mut board = Board::new();
+        let mut board = Board::empty();
         board
             .spawn_at(Coordinate {
                 row: BOARD_ROWS - 1,
