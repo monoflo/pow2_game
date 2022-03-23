@@ -1,3 +1,5 @@
+use rand::Rng;
+
 use crate::{Cell, Coordinate, Move};
 
 /// Defines the number of columns in the board.
@@ -43,8 +45,10 @@ impl Board {
 
     /// Spawns a new cell on the game board.
     fn spawn(&mut self) -> Result<(), ()> {
-        // TODO: implement
-        self.spawn_at(Coordinate { row: 0, col: 0 })
+        let mut rng = rand::thread_rng();
+        let r: usize = rng.gen_range(0..BOARD_ROWS);
+        let c: usize = rng.gen_range(0..BOARD_COLS);
+        self.spawn_at(Coordinate { row: r, col: c })
     }
 
     /// Spawns a new cell on the game board at the specified location.
