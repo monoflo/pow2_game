@@ -1,12 +1,12 @@
 mod board;
 mod cell;
 mod coordinate;
-mod direction;
+mod movement;
 
 use board::Board;
 use cell::Cell;
 use coordinate::Coordinate;
-use direction::Direction;
+use movement::Move;
 
 fn main() {
     let mut board = Board::new();

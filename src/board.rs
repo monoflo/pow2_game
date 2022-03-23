@@ -1,4 +1,4 @@
-use crate::{Cell, Coordinate, Direction};
+use crate::{Cell, Coordinate, Move};
 
 /// Defines the number of columns in the board.
 const BOARD_COLS: usize = 4;
@@ -23,15 +23,15 @@ impl Board {
     ///
     /// # Arguments
     ///
-    /// * `dir` - the direction in which to shift the game board
-    pub fn shift(&mut self, dir: Direction) {
-        // TODO: implement
-        match dir {
-            Direction::Down => todo!(),
-            Direction::Left => todo!(),
-            Direction::Right => todo!(),
-            Direction::Up => todo!(),
-        }
+    /// * `mov` - the movement type to handle
+    pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
+        return match mov {
+            Move::Down => todo!(),
+            Move::Left => todo!(),
+            Move::Right => todo!(),
+            Move::Up => todo!(),
+            Move::Undo => todo!(),
+        };
     }
 
     /// Spawns a new cell on the game board.
