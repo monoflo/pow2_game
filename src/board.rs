@@ -35,7 +35,7 @@ impl Board {
     }
 
     /// Spawns a new cell on the game board.
-    pub fn spawn(&mut self) -> Result<(), ()> {
+    fn spawn(&mut self) -> Result<(), ()> {
         // TODO: implement
         self.spawn_at(Coordinate { row: 0, col: 0 })
     }

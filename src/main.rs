@@ -10,7 +10,6 @@ use movement::Move;
 
 fn main() {
     let mut board = Board::new();
-    board.spawn().unwrap();
 
     print!("{}", board.to_string());
 }
