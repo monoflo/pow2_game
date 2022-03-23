@@ -136,4 +136,47 @@ mod tests {
             .flat_map(|row| row.iter())
             .all(|cell| cell.is_empty()));
     }
+
+    #[test]
+    #[should_panic]
+    fn spawn_at_invalid_col() {
+        let mut board = Board::new();
+        board.spawn_at(Coordinate {
+            row: 0,
+            col: usize::MAX,
+        });
+    }
+
+    #[test]
+    #[should_panic]
+    fn spawn_at_invalid_row() {
+        let mut board = Board::new();
+        board.spawn_at(Coordinate {
+            row: usize::MAX,
+            col: 0,
+        });
+    }
+
+    #[test]
+    fn spawn_at_0_0() {
+        let mut board = Board::new();
+        board.spawn_at(Coordinate { row: 0, col: 0 }).unwrap();
+        let mut cells = board.grid.iter().flat_map(|row| row.iter());
+        assert!(!cells.next().unwrap().is_empty());
+        assert!(cells.all(|cell| cell.is_empty()));
+    }
+
+    #[test]
+    fn spawn_at_end_end() {
+        let mut board = Board::new();
+        board
+            .spawn_at(Coordinate {
+                row: BOARD_ROWS - 1,
+                col: BOARD_COLS - 1,
+            })
+            .unwrap();
+        let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
+        assert!(!cells.next().unwrap().is_empty());
+        assert!(cells.all(|cell| cell.is_empty()));
+    }
 }
