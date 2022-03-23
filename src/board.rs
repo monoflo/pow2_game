@@ -190,4 +190,16 @@ mod tests {
         assert!(!cells.next().unwrap().is_empty());
         assert!(cells.all(|cell| cell.is_empty()));
     }
+
+    #[test]
+    fn spawn_all() {
+        let mut board = Board::empty();
+        let NUM_CELLS = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
+
+        for _ in 0..NUM_CELLS {
+            board.spawn().unwrap();
+        }
+
+        board.spawn().unwrap_err();
+    }
 }
