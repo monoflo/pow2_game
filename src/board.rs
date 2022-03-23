@@ -13,10 +13,17 @@ pub struct Board {
 
 impl Board {
     /// Returns a new, empty instance of a game board.
-    pub fn new() -> Self {
+    fn empty() -> Self {
         Self {
             grid: [[Cell::new(); BOARD_COLS]; BOARD_ROWS],
         }
+    }
+
+    /// Returns a new instance of a game board.
+    pub fn new() -> Self {
+        let mut inst = Board::empty();
+        inst.spawn();
+        inst
     }
 
     /// Handles movement on the game board.
