@@ -202,4 +202,15 @@ mod tests {
 
         board.spawn().unwrap_err();
     }
+
+    #[test]
+    fn spawn_each() {
+        let mut board = Board::empty();
+        for row in 0..BOARD_ROWS {
+            for col in 0..BOARD_COLS {
+                board.spawn_at(Coordinate { row: row, col: col }).unwrap();
+            }
+        }
+        board.spawn().unwrap_err();
+    }
 }
