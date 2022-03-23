@@ -67,10 +67,7 @@ impl Board {
     /// # Arguments
     ///
     /// * `is_empty` - whether the cell should be empty; search criteria
-    fn get_cells_by_emptiness_board(
-        &self,
-        is_empty: bool,
-    ) -> impl Iterator<Item = Coordinate> + '_ {
+    fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = Coordinate> + '_ {
         (0..BOARD_ROWS)
             .zip(0..BOARD_COLS)
             .filter(move |pos| is_empty == self.grid[pos.0][pos.1].is_empty())
