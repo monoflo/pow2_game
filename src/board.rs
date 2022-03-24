@@ -189,6 +189,30 @@ mod tests {
     }
 
     #[test]
+    fn spawn_at_0_end() {
+        let board = setup_with_spawn_at(vec![Coord(0, BOARD_COLS - 1)]);
+        let mut cells = board.grid.iter().flat_map(|row| row.iter());
+        for _ in 0..BOARD_COLS - 1 {
+            assert!(cells.next().unwrap().is_empty());
+        }
+        assert!(!cells.next().unwrap().is_empty());
+        assert!(cells.all(|cell| cell.is_empty()));
+    }
+
+    #[test]
+    fn spawn_at_end_0() {
+        let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, 0)]);
+        let mut cells = board.grid.iter().flat_map(|row| row.iter());
+        for _ in 0..BOARD_ROWS - 1 {
+            for _ in 0..BOARD_COLS {
+                assert!(cells.next().unwrap().is_empty());
+            }
+        }
+        assert!(!cells.next().unwrap().is_empty());
+        assert!(cells.all(|cell| cell.is_empty()));
+    }
+
+    #[test]
     fn spawn_all() {
         let mut board = Board::empty();
         let NUM_CELLS = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
