@@ -161,21 +161,21 @@ mod tests {
     #[test]
     #[should_panic]
     fn spawn_at_invalid_col() {
-        let mut board = Board::empty();
-        board.spawn_at(Coordinate {
+        let coords = vec![Coordinate {
             row: 0,
             col: usize::MAX,
-        });
+        }];
+        setup_with_spawn_at(coords);
     }
 
     #[test]
     #[should_panic]
     fn spawn_at_invalid_row() {
-        let mut board = Board::empty();
-        board.spawn_at(Coordinate {
+        let coords = vec![Coordinate {
             row: usize::MAX,
             col: 0,
-        });
+        }];
+        setup_with_spawn_at(coords);
     }
 
     #[test]
