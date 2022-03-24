@@ -134,6 +134,19 @@ impl std::fmt::Display for Board {
 mod tests {
     use super::*;
 
+    /// Initializes a board with cells spawned at the given coordinates.
+    ///
+    /// # Arguments
+    ///
+    /// * `iter` - an `impl` of `IntoIterator` containing `Coordinate`s to spawn cells at
+    fn setup_with_spawn_at(iter: impl IntoIterator<Item = Coordinate>) -> Board {
+        let mut board = Board::empty();
+        for coord in iter.into_iter() {
+            board.spawn_at(coord).unwrap();
+        }
+        board
+    }
+
     #[test]
     /// Affirm that `Board::empty()` initializes a board with all cells having `value = 0`.
     fn empty() {
