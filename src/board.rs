@@ -163,6 +163,20 @@ mod tests {
                 .all(|cell| cell.is_empty()));
         }
 
+        #[test]
+        /// Affirm that `Board::new()` initializes a board with all cells having `value = 0`,
+        /// except one.
+        fn new() {
+            let board = Board::new();
+            let mut found = false;
+            for row in 0..BOARD_ROWS {
+                for col in 0..BOARD_COLS {
+                    let is_empty = board.grid[row][col].is_empty();
+                    assert!(is_empty || !found);
+                    found = found || !is_empty;
+                }
+            }
+        }
     }
 
     mod spawn_at {
