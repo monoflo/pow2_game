@@ -210,4 +210,35 @@ mod tests {
         }
         board.spawn().unwrap_err();
     }
+
+    #[test]
+    fn get_iter_of_empty_all_on_empty() {
+        let board = Board::empty();
+        let vec = board
+            .get_cells_by_emptiness(true)
+            .collect::<Vec<Coordinate>>();
+        assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
+    }
+
+    #[test]
+    fn get_iter_of_empty_col_on_empty() {
+        let board = Board::empty();
+        for col in 0..BOARD_COLS {
+            let vec = board
+                .get_cells_by_emptiness_col(true, col)
+                .collect::<Vec<Coordinate>>();
+            assert_eq!(BOARD_COLS, vec.len());
+        }
+    }
+
+    #[test]
+    fn get_iter_of_empty_row_on_empty() {
+        let board = Board::empty();
+        for row in 0..BOARD_ROWS {
+            let vec = board
+                .get_cells_by_emptiness_row(true, row)
+                .collect::<Vec<Coordinate>>();
+            assert_eq!(BOARD_COLS, vec.len());
+        }
+    }
 }
