@@ -163,21 +163,18 @@ mod tests {
     #[test]
     #[should_panic]
     fn spawn_at_invalid_col() {
-        let coords = vec![Coord(0, usize::MAX)];
-        setup_with_spawn_at(coords);
+        setup_with_spawn_at(vec![Coord(0, usize::MAX)]);
     }
 
     #[test]
     #[should_panic]
     fn spawn_at_invalid_row() {
-        let coords = vec![Coord(usize::MAX, 0)];
-        setup_with_spawn_at(coords);
+        setup_with_spawn_at(vec![Coord(usize::MAX, 0)]);
     }
 
     #[test]
     fn spawn_at_0_0() {
-        let mut board = Board::empty();
-        board.spawn_at(Coord(0, 0)).unwrap();
+        let board = setup_with_spawn_at(vec![Coord(0, 0)]);
         let mut cells = board.grid.iter().flat_map(|row| row.iter());
         assert!(!cells.next().unwrap().is_empty());
         assert!(cells.all(|cell| cell.is_empty()));
@@ -185,10 +182,7 @@ mod tests {
 
     #[test]
     fn spawn_at_end_end() {
-        let mut board = Board::empty();
-        board
-            .spawn_at(Coord(BOARD_ROWS - 1, BOARD_COLS - 1))
-            .unwrap();
+        let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, BOARD_COLS - 1)]);
         let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
         assert!(!cells.next().unwrap().is_empty());
         assert!(cells.all(|cell| cell.is_empty()));
