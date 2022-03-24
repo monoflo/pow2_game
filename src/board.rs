@@ -1,11 +1,15 @@
 use rand::seq::SliceRandom;
 
-use crate::{Cell, Coordinate, Move};
+use crate::{Cell, Move};
 
 /// Defines the number of columns in the board.
 const BOARD_COLS: usize = 4;
 /// Defines the number or rows in the board.
 const BOARD_ROWS: usize = 4;
+
+#[derive(Copy, Clone, Debug)]
+/// Represents a row and column on the game board.
+pub struct Coord(usize, usize);
 
 /// The representation of a game board.
 pub struct Board {
@@ -46,9 +50,7 @@ impl Board {
     /// Spawns a new cell on the game board.
     fn spawn(&mut self) -> Result<(), ()> {
         let mut rng = rand::thread_rng();
-        let empty_coords = self
-            .get_cells_by_emptiness(true)
-            .collect::<Vec<Coordinate>>();
+        let empty_coords = self.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
         let chosen = empty_coords.choose(&mut rng);
 
         match chosen {
@@ -62,10 +64,10 @@ impl Board {
     /// # Arguments
     ///
     /// * `pos` - the grid coordinate at which to spawn
-    fn spawn_at(&mut self, pos: Coordinate) -> Result<(), ()> {
-        assert!(pos.col < BOARD_COLS);
-        assert!(pos.row < BOARD_ROWS);
-        self.grid[pos.row][pos.col].spawn()
+    fn spawn_at(&mut self, pos: Coord) -> Result<(), ()> {
+        assert!(pos.0 < BOARD_ROWS);
+        assert!(pos.1 < BOARD_COLS);
+        self.grid[pos.0][pos.1].spawn()
     }
 
     /// Retrieves all cells matching the specified emptiness.
@@ -73,7 +75,7 @@ impl Board {
     /// # Arguments
     ///
     /// * `is_empty` - whether the cell should be empty; search criteria
-    fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = Coordinate> + '_ {
+    fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = Coord> + '_ {
         (0..BOARD_ROWS).flat_map(move |row| self.get_cells_by_emptiness_row(is_empty, row))
     }
 
@@ -87,11 +89,11 @@ impl Board {
         &self,
         is_empty: bool,
         col: usize,
-    ) -> impl Iterator<Item = Coordinate> + '_ {
+    ) -> impl Iterator<Item = Coord> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
             .filter(move |row| is_empty == self.grid[*row][col].is_empty())
-            .map(move |row| Coordinate { row, col })
+            .map(move |row| Coord(row, col))
     }
 
     /// Retrieves cells in the given row matching the specified emptiness.
@@ -104,11 +106,11 @@ impl Board {
         &self,
         is_empty: bool,
         row: usize,
-    ) -> impl Iterator<Item = Coordinate> + '_ {
+    ) -> impl Iterator<Item = Coord> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
             .filter(move |col| is_empty == self.grid[row][*col].is_empty())
-            .map(move |col| Coordinate { row, col })
+            .map(move |col| Coord(row, col))
     }
 }
 
@@ -138,8 +140,8 @@ mod tests {
     ///
     /// # Arguments
     ///
-    /// * `iter` - an `impl` of `IntoIterator` containing `Coordinate`s to spawn cells at
-    fn setup_with_spawn_at(iter: impl IntoIterator<Item = Coordinate>) -> Board {
+    /// * `iter` - an `impl` of `IntoIterator` containing `Coord`s to spawn cells at
+    fn setup_with_spawn_at(iter: impl IntoIterator<Item = Coord>) -> Board {
         let mut board = Board::empty();
         for coord in iter.into_iter() {
             board.spawn_at(coord).unwrap();
@@ -161,27 +163,21 @@ mod tests {
     #[test]
     #[should_panic]
     fn spawn_at_invalid_col() {
-        let coords = vec![Coordinate {
-            row: 0,
-            col: usize::MAX,
-        }];
+        let coords = vec![Coord(0, usize::MAX)];
         setup_with_spawn_at(coords);
     }
 
     #[test]
     #[should_panic]
     fn spawn_at_invalid_row() {
-        let coords = vec![Coordinate {
-            row: usize::MAX,
-            col: 0,
-        }];
+        let coords = vec![Coord(usize::MAX, 0)];
         setup_with_spawn_at(coords);
     }
 
     #[test]
     fn spawn_at_0_0() {
         let mut board = Board::empty();
-        board.spawn_at(Coordinate { row: 0, col: 0 }).unwrap();
+        board.spawn_at(Coord(0, 0)).unwrap();
         let mut cells = board.grid.iter().flat_map(|row| row.iter());
         assert!(!cells.next().unwrap().is_empty());
         assert!(cells.all(|cell| cell.is_empty()));
@@ -191,10 +187,7 @@ mod tests {
     fn spawn_at_end_end() {
         let mut board = Board::empty();
         board
-            .spawn_at(Coordinate {
-                row: BOARD_ROWS - 1,
-                col: BOARD_COLS - 1,
-            })
+            .spawn_at(Coord(BOARD_ROWS - 1, BOARD_COLS - 1))
             .unwrap();
         let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
         assert!(!cells.next().unwrap().is_empty());
@@ -218,7 +211,7 @@ mod tests {
         let mut board = Board::empty();
         for row in 0..BOARD_ROWS {
             for col in 0..BOARD_COLS {
-                board.spawn_at(Coordinate { row: row, col: col }).unwrap();
+                board.spawn_at(Coord(row, col)).unwrap();
             }
         }
         board.spawn().unwrap_err();
@@ -227,9 +220,7 @@ mod tests {
     #[test]
     fn get_iter_of_empty_all_on_empty() {
         let board = Board::empty();
-        let vec = board
-            .get_cells_by_emptiness(true)
-            .collect::<Vec<Coordinate>>();
+        let vec = board.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
         assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
     }
 
@@ -239,7 +230,7 @@ mod tests {
         for col in 0..BOARD_COLS {
             let vec = board
                 .get_cells_by_emptiness_col(true, col)
-                .collect::<Vec<Coordinate>>();
+                .collect::<Vec<Coord>>();
             assert_eq!(BOARD_COLS, vec.len());
         }
     }
@@ -250,7 +241,7 @@ mod tests {
         for row in 0..BOARD_ROWS {
             let vec = board
                 .get_cells_by_emptiness_row(true, row)
-                .collect::<Vec<Coordinate>>();
+                .collect::<Vec<Coord>>();
             assert_eq!(BOARD_COLS, vec.len());
         }
     }

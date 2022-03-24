@@ -1,13 +1,11 @@
 mod board;
 mod cell;
-mod coordinate;
 mod movement;
 
 use std::io::Write;
 
 use board::Board;
 use cell::Cell;
-use coordinate::Coordinate;
 use movement::Move;
 
 fn parse_input(inp: &str) -> Result<Move, ()> {
