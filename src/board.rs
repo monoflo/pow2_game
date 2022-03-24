@@ -149,135 +149,160 @@ mod tests {
         board
     }
 
-    #[test]
-    /// Affirm that `Board::empty()` initializes a board with all cells having `value = 0`.
-    fn empty() {
-        let board = Board::empty();
-        assert!(board
-            .grid
-            .iter()
-            .flat_map(|row| row.iter())
-            .all(|cell| cell.is_empty()));
-    }
+    mod init {
+        use super::*;
 
-    #[test]
-    #[should_panic]
-    /// Affirm that attempting to spawn in an invalid column will fail.
-    fn spawn_at_invalid_col() {
-        let col = usize::MAX;
-        assert!(col < BOARD_COLS);
-        setup_with_spawn_at(vec![Coord(0, col)]);
-    }
-
-    #[test]
-    #[should_panic]
-    /// Affirm that attempting to spawn in an invalid row will fail.
-    fn spawn_at_invalid_row() {
-        let row = usize::MAX;
-        assert!(row < BOARD_ROWS);
-        setup_with_spawn_at(vec![Coord(row, 0)]);
-    }
-
-    #[test]
-    /// Affirm that only the top-leftmost cell will be non-empty if a cell is spawned there.
-    fn spawn_at_corner_top_left() {
-        let board = setup_with_spawn_at(vec![Coord(0, 0)]);
-        let mut cells = board.grid.iter().flat_map(|row| row.iter());
-        assert!(!cells.next().unwrap().is_empty());
-        assert!(cells.all(|cell| cell.is_empty()));
-    }
-
-    #[test]
-    /// Affirm that only the bottom-rightmost cell will be non-empty if a cell is spawned there.
-    fn spawn_at_corner_bottom_right() {
-        let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, BOARD_COLS - 1)]);
-        let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
-        assert!(!cells.next().unwrap().is_empty());
-        assert!(cells.all(|cell| cell.is_empty()));
-    }
-
-    #[test]
-    /// Affirm that only the top-rightmost cell will be non-empty if a cell is spawned there.
-    fn spawn_at_corner_top_right() {
-        let board = setup_with_spawn_at(vec![Coord(0, BOARD_COLS - 1)]);
-        let mut cells = board.grid.iter().flat_map(|row| row.iter());
-        for _ in 0..BOARD_COLS - 1 {
-            assert!(cells.next().unwrap().is_empty());
+        #[test]
+        /// Affirm that `Board::empty()` initializes a board with all cells having `value = 0`.
+        fn empty() {
+            let board = Board::empty();
+            assert!(board
+                .grid
+                .iter()
+                .flat_map(|row| row.iter())
+                .all(|cell| cell.is_empty()));
         }
-        assert!(!cells.next().unwrap().is_empty());
-        assert!(cells.all(|cell| cell.is_empty()));
+
     }
 
-    #[test]
-    /// Affirm that only the bottom-leftmost cell will be non-empty if a cell is spawned there.
-    fn spawn_at_corner_bottom_left() {
-        let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, 0)]);
-        let mut cells = board.grid.iter().flat_map(|row| row.iter());
-        for _ in 0..BOARD_ROWS - 1 {
-            for _ in 0..BOARD_COLS {
+    mod spawn_at {
+        use super::*;
+
+        #[test]
+        /// Affirm that each cell on the board can be spawned-at sequentially until the board is full
+        /// and then no more.
+        fn all() {
+            let mut board = Board::empty();
+            for row in 0..BOARD_ROWS {
+                for col in 0..BOARD_COLS {
+                    board.spawn_at(Coord(row, col)).unwrap();
+                }
+            }
+            board.spawn().unwrap_err();
+        }
+
+        #[test]
+        /// Affirm that only the bottom-rightmost cell will be non-empty if a cell is spawned there.
+        fn corner_bottom_right() {
+            let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, BOARD_COLS - 1)]);
+            let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
+            assert!(!cells.next().unwrap().is_empty());
+            assert!(cells.all(|cell| cell.is_empty()));
+        }
+
+        #[test]
+        /// Affirm that only the bottom-leftmost cell will be non-empty if a cell is spawned there.
+        fn corner_bottom_left() {
+            let board = setup_with_spawn_at(vec![Coord(BOARD_ROWS - 1, 0)]);
+            let mut cells = board.grid.iter().flat_map(|row| row.iter());
+            for _ in 0..BOARD_ROWS - 1 {
+                for _ in 0..BOARD_COLS {
+                    assert!(cells.next().unwrap().is_empty());
+                }
+            }
+            assert!(!cells.next().unwrap().is_empty());
+            assert!(cells.all(|cell| cell.is_empty()));
+        }
+
+        #[test]
+        /// Affirm that only the top-leftmost cell will be non-empty if a cell is spawned there.
+        fn corner_top_left() {
+            let board = setup_with_spawn_at(vec![Coord(0, 0)]);
+            let mut cells = board.grid.iter().flat_map(|row| row.iter());
+            assert!(!cells.next().unwrap().is_empty());
+            assert!(cells.all(|cell| cell.is_empty()));
+        }
+
+        #[test]
+        /// Affirm that only the top-rightmost cell will be non-empty if a cell is spawned there.
+        fn corner_top_right() {
+            let board = setup_with_spawn_at(vec![Coord(0, BOARD_COLS - 1)]);
+            let mut cells = board.grid.iter().flat_map(|row| row.iter());
+            for _ in 0..BOARD_COLS - 1 {
                 assert!(cells.next().unwrap().is_empty());
             }
-        }
-        assert!(!cells.next().unwrap().is_empty());
-        assert!(cells.all(|cell| cell.is_empty()));
-    }
-
-    #[test]
-    /// Affirm that each cell on the board can be spawned-at randomly until the board is full and
-    /// then no more.
-    fn spawn_all_rand() {
-        let mut board = Board::empty();
-        let num_cells = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
-
-        for _ in 0..num_cells {
-            board.spawn().unwrap();
+            assert!(!cells.next().unwrap().is_empty());
+            assert!(cells.all(|cell| cell.is_empty()));
         }
 
-        board.spawn().unwrap_err();
+        #[test]
+        #[should_panic]
+        /// Affirm that attempting to spawn in an invalid column will fail.
+        fn invalid_col() {
+            let col = usize::MAX;
+            assert!(col < BOARD_COLS);
+            setup_with_spawn_at(vec![Coord(0, col)]);
+        }
+
+        #[test]
+        #[should_panic]
+        /// Affirm that attempting to spawn in an invalid row will fail.
+        fn invalid_row() {
+            let row = usize::MAX;
+            assert!(row < BOARD_ROWS);
+            setup_with_spawn_at(vec![Coord(row, 0)]);
+        }
     }
 
-    #[test]
-    /// Affirm that each cell on the board can be spawned-at sequentially until the board is full
-    /// and then no more.
-    fn spawn_all_seq() {
-        let mut board = Board::empty();
-        for row in 0..BOARD_ROWS {
+    mod spawn {
+        use super::*;
+
+        #[test]
+        /// Affirm that each cell on the board can be spawned-at randomly until the board is full and
+        /// then no more.
+        fn all() {
+            let mut board = Board::empty();
+            let num_cells = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
+
+            for _ in 0..num_cells {
+                board.spawn().unwrap();
+            }
+
+            board.spawn().unwrap_err();
+        }
+    }
+
+    mod get_cells_by_emptiness {
+        use super::*;
+
+        #[test]
+        /// Affirm that `Board::get_cells_by_emptiness()` functions properly on an empty board state.
+        fn board_empty() {
+            let board = Board::empty();
+            let vec = board.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
+            assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
+        }
+    }
+
+    mod get_cells_by_emptiness_col {
+        use super::*;
+
+        #[test]
+        /// Affirm that `Board::get_cells_by_emptiness_col()` functions properly on an empty board state.
+        fn board_empty() {
+            let board = Board::empty();
             for col in 0..BOARD_COLS {
-                board.spawn_at(Coord(row, col)).unwrap();
+                let vec = board
+                    .get_cells_by_emptiness_col(true, col)
+                    .collect::<Vec<Coord>>();
+                assert_eq!(BOARD_COLS, vec.len());
             }
         }
-        board.spawn().unwrap_err();
     }
 
-    #[test]
-    /// Affirm that `Board::get_cells_by_emptiness()` functions properly on an empty board state.
-    fn get_cells_by_emptiness_empty_board() {
-        let board = Board::empty();
-        let vec = board.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
-        assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
-    }
+    mod get_cells_by_emptiness_row {
+        use super::*;
 
-    #[test]
-    /// Affirm that `Board::get_cells_by_emptiness_col()` functions properly on an empty board state.
-    fn get_cells_by_emptiness_col_empty_board() {
-        let board = Board::empty();
-        for col in 0..BOARD_COLS {
-            let vec = board
-                .get_cells_by_emptiness_col(true, col)
-                .collect::<Vec<Coord>>();
-            assert_eq!(BOARD_COLS, vec.len());
-        }
-    }
-
-    #[test]
-    /// Affirm that `Board::get_cells_by_emptiness_row()` functions properly on an empty board state.
-    fn get_cells_by_emptiness_row_empty_board() {
-        let board = Board::empty();
-        for row in 0..BOARD_ROWS {
-            let vec = board
-                .get_cells_by_emptiness_row(true, row)
-                .collect::<Vec<Coord>>();
-            assert_eq!(BOARD_COLS, vec.len());
+        #[test]
+        /// Affirm that `Board::get_cells_by_emptiness_row()` functions properly on an empty board state.
+        fn board_empty() {
+            let board = Board::empty();
+            for row in 0..BOARD_ROWS {
+                let vec = board
+                    .get_cells_by_emptiness_row(true, row)
+                    .collect::<Vec<Coord>>();
+                assert_eq!(BOARD_COLS, vec.len());
+            }
         }
     }
 }
