@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::seq::SliceRandom;
 
 use crate::{Cell, Coordinate, Move};
 
@@ -46,9 +46,15 @@ impl Board {
     /// Spawns a new cell on the game board.
     fn spawn(&mut self) -> Result<(), ()> {
         let mut rng = rand::thread_rng();
-        let r: usize = rng.gen_range(0..BOARD_ROWS);
-        let c: usize = rng.gen_range(0..BOARD_COLS);
-        self.spawn_at(Coordinate { row: r, col: c })
+        let empty_coords = self
+            .get_cells_by_emptiness(true)
+            .collect::<Vec<Coordinate>>();
+        let chosen = empty_coords.choose(&mut rng);
+
+        match chosen {
+            Some(coord) => self.spawn_at(*coord),
+            None => Err(()),
+        }
     }
 
     /// Spawns a new cell on the game board at the specified location.
