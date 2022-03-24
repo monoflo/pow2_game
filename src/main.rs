@@ -20,20 +20,19 @@ fn parse_input(inp: &str) -> Result<Move, ()> {
 }
 
 fn main() {
-    let mut input = String::new();
     let mut board = Board::new();
 
     println!("{}", board.to_string());
 
     loop {
+        let mut input = String::new();
         print!("move: ");
         std::io::stdout().flush().unwrap();
-        std::io::stdin().read_line(&mut input);
+        std::io::stdin().read_line(&mut input).unwrap();
         input.truncate(1);
-        let mut input = input.to_lowercase();
+        let input = input.to_lowercase();
         let mov: Move = parse_input(&input).expect("invalid move type");
-        let mut input = String::new();
-        board.movement(mov);
+        board.movement(mov).unwrap();
         println!("{}", board.to_string());
     }
 }

@@ -21,11 +21,6 @@ impl Cell {
         self.value == 0
     }
 
-    /// Returns the value held by the cell.
-    pub fn value(&self) -> usize {
-        self.value
-    }
-
     /// Merge the current cell with another.
     /// If successful, `self` will grow while the `other` will be despawned.
     /// Fails if the cell values are not equal to each other or if one is empty.
@@ -158,7 +153,7 @@ mod tests {
     fn merge_as_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
-        merger.spawn();
+        merger.spawn().unwrap();
         mergee.merge(&mut merger).unwrap_err();
     }
 
@@ -168,7 +163,7 @@ mod tests {
     fn merge_with_empty() {
         let mut merger = Cell::new();
         let mut mergee = Cell::new();
-        mergee.spawn();
+        mergee.spawn().unwrap();
         mergee.merge(&mut merger).unwrap_err();
     }
 

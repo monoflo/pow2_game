@@ -28,7 +28,7 @@ impl Board {
     /// Returns a new instance of a game board.
     pub fn new() -> Self {
         let mut inst = Board::empty();
-        inst.spawn();
+        inst.spawn().unwrap();
         inst
     }
 
@@ -38,13 +38,13 @@ impl Board {
     ///
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
-        return match mov {
+        match mov {
             Move::Down => todo!(),
             Move::Left => todo!(),
             Move::Right => todo!(),
             Move::Up => todo!(),
             Move::Undo => todo!(),
-        };
+        }
     }
 
     /// Spawns a new cell on the game board.
@@ -215,9 +215,9 @@ mod tests {
     #[test]
     fn spawn_all() {
         let mut board = Board::empty();
-        let NUM_CELLS = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
+        let num_cells = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
 
-        for _ in 0..NUM_CELLS {
+        for _ in 0..num_cells {
             board.spawn().unwrap();
         }
 
