@@ -39,7 +39,7 @@ impl Cell {
         }
 
         self.grow();
-        other.despawn();
+        other.despawn().unwrap();
 
         Ok(())
     }
@@ -65,8 +65,12 @@ impl Cell {
     }
 
     /// Reverts the cell back to an empty state.
-    fn despawn(&mut self) {
+    fn despawn(&mut self) -> Result<(), ()> {
+        if self.value == 0 {
+            return Err(());
+        }
         self.value = 0;
+        Ok(())
     }
 
     /// Increases the value of the cell by a power of two.
@@ -105,7 +109,7 @@ mod tests {
 
         // spawn until other value is reached
         while val == cell.value {
-            cell.despawn();
+            cell.despawn().unwrap();
             cell.spawn().unwrap();
         }
 
@@ -139,7 +143,7 @@ mod tests {
     /// Affirm that `Cell::despawn()` will reset the `value` of the cell to zero.
     fn despawn() {
         let mut cell = Cell { value: 2 };
-        cell.despawn();
+        cell.despawn().unwrap();
         assert_eq!(0, cell.value);
     }
 
