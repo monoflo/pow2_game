@@ -20,6 +20,19 @@ impl Cell {
     }
 }
 
+#[test]
+fn test_is_empty_after_new() {
+    let cell = Cell::new();
+    assert!(cell.is_empty());
+}
+
+#[test]
+fn test_is_empty_after_spawn() {
+    let mut cell = Cell::new();
+    cell.spawn().unwrap();
+    assert!(!cell.is_empty());
+}
+
 impl Cell {
     /// Returns the value held by the cell.
     pub fn value(&self) -> usize {
