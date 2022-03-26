@@ -131,24 +131,58 @@ fn test_despawn_zero() {
 
 impl Cell {
     /// Increases the value of the cell by a power of two.
-    fn grow(&mut self) {
-        assert_ne!(0, self.0);
-        self.0 <<= 1;
+    fn grow(&mut self) -> Result<(), ()> {
+        if self.0 == 0 {
+            return Err(());
+        }
+
+        let (result, overflow) = self.0.overflowing_mul(2);
+
+        if overflow {
+            return Err(());
+        }
+
+        self.0 = result;
+        Ok(())
     }
 }
 
-/// Affirm that `Cell::grow()` will double the value of the cell.
 #[test]
-fn test_grow() {
+fn test_grow_from_two() {
     let mut cell = Cell(2);
-    cell.grow();
+    cell.grow().unwrap();
     assert_eq!(4, cell.0);
-    cell.0 = 8;
-    cell.grow();
-    assert_eq!(16, cell.0);
-    cell.0 = 32;
-    cell.grow();
-    assert_eq!(64, cell.0);
+}
+
+#[test]
+fn test_grow_from_four() {
+    let mut cell = Cell(4);
+    cell.grow().unwrap();
+    assert_eq!(8, cell.0);
+}
+
+#[test]
+fn test_grow_from_zero() {
+    let mut cell = Cell(0);
+    cell.grow().unwrap_err();
+}
+
+#[test]
+fn test_grow_from_second_highest_bit_set() {
+    let mut cell = Cell(1 << (usize::BITS - 2));
+    cell.grow().unwrap();
+}
+
+#[test]
+fn test_grow_from_highest_bit_set() {
+    let mut cell = Cell(1 << (usize::BITS - 1));
+    cell.grow().unwrap_err();
+}
+
+#[test]
+fn test_grow_from_max_val() {
+    let mut cell = Cell(usize::MAX);
+    cell.grow().unwrap_err();
 }
 
 impl Cell {
