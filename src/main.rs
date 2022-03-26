@@ -10,10 +10,10 @@ use movement::Move;
 
 fn parse_input(inp: &str) -> Result<Move, ()> {
     return match inp {
-        "w" => Ok(Move::Up),
-        "a" => Ok(Move::Left),
-        "s" => Ok(Move::Down),
-        "d" => Ok(Move::Right),
+        "w" => Ok(Move::ShiftUp),
+        "a" => Ok(Move::ShiftLeft),
+        "s" => Ok(Move::ShiftDown),
+        "d" => Ok(Move::ShiftRight),
         "u" => Ok(Move::Undo),
         _ => Err(()),
     };

@@ -304,10 +304,10 @@ impl Board {
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
         match mov {
-            Move::Down => todo!(),
-            Move::Left => todo!(),
-            Move::Right => todo!(),
-            Move::Up => todo!(),
+            Move::ShiftDown => todo!(),
+            Move::ShiftLeft => todo!(),
+            Move::ShiftRight => todo!(),
+            Move::ShiftUp => todo!(),
             Move::Undo => todo!(),
         }
     }
