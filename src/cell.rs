@@ -40,6 +40,16 @@ impl Cell {
     }
 }
 
+#[test]
+fn test_value_zero() {
+    assert_eq!(0, Cell(0).value());
+}
+
+#[test]
+fn test_value_two() {
+    assert_eq!(2, Cell(2).value());
+}
+
 impl Cell {
     /// Returns a new, empty instance of a cell.
     pub fn new() -> Self {
