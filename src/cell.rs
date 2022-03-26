@@ -117,10 +117,16 @@ impl Cell {
 
 /// Affirm that `Cell::despawn()` will reset the value of the cell to zero.
 #[test]
-fn test_despawn() {
+fn test_despawn_nonzero() {
     let mut cell = Cell(2);
     cell.despawn().unwrap();
     assert_eq!(0, cell.0);
+}
+
+#[test]
+fn test_despawn_zero() {
+    let mut cell = Cell(0);
+    cell.despawn().unwrap_err();
 }
 
 impl Cell {
