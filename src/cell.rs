@@ -21,6 +21,11 @@ impl Cell {
         self.value == 0
     }
 
+    /// Returns the value held by the cell.
+    pub fn value(&self) -> usize {
+        self.value
+    }
+
     /// Merge the current cell with another.
     /// If successful, `self` will grow while the `other` will be despawned.
     /// Fails if the cell values are not equal to each other or if one is empty.
