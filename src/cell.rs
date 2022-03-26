@@ -88,31 +88,19 @@ impl Cell {
     }
 }
 
-/// Affirm that `Cell::spawn()` can initialize the cell value to both two and four.
+/// Affirm that `Cell::spawn()` can initialize a zero cell value to either two or four.
 #[test]
-fn test_spawn() {
-    let mut cell = Cell::new();
+fn test_spawn_zero() {
+    let mut cell = Cell(0);
     cell.spawn().unwrap();
-
-    // test first value
-    let val = cell.0;
-    assert!(val == 2 || val == 4);
-
-    // spawn until other value is reached
-    while val == cell.0 {
-        cell.despawn().unwrap();
-        cell.spawn().unwrap();
-    }
-
-    // test other value
-    assert!(val == 2 || val == 4);
+    assert_ne!(0, cell.0);
+    assert!(cell.0 == 2 || cell.0 == 4);
 }
 
-/// Affirm that `Cell::spawn()` will result in an error if the cell has already been spawned.
+/// Affirm that `Cell::spawn()` will result in an error if the cell value is non-zero.
 #[test]
-fn test_double_spawn() {
-    let mut cell = Cell::new();
-    cell.spawn().unwrap();
+fn test_spawn_nonzero() {
+    let mut cell = Cell(2);
     cell.spawn().unwrap_err();
 }
 
