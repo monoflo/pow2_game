@@ -13,6 +13,12 @@ impl std::fmt::Display for Cell {
     }
 }
 
+#[test]
+fn test_to_string() {
+    let cell = Cell(64);
+    assert_eq!("64", cell.to_string());
+}
+
 impl Cell {
     /// Returns whether the cell is empty.
     pub fn is_empty(&self) -> bool {
