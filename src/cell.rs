@@ -17,6 +17,7 @@ fn test_to_string() {
 }
 
 impl Cell {
+    #[inline(always)]
     /// Returns whether the cell is empty.
     pub fn is_empty(&self) -> bool {
         self.0 == 0
@@ -37,6 +38,7 @@ fn test_is_empty_after_spawn() {
 }
 
 impl Cell {
+    #[inline(always)]
     /// Returns the value held by the cell.
     pub fn value(&self) -> usize {
         self.0
