@@ -1,8 +1,5 @@
 use rand::Rng;
 
-/// Defines the likelihood of spawning a four instead of a two.
-const LIKELIHOOD_SPAWN_FOUR: f64 = 0.1;
-
 /// The representation of a cell on the game board.
 #[derive(Copy, Clone, Debug)]
 pub struct Cell(usize);
@@ -74,11 +71,12 @@ impl Cell {
     /// Generates a new, intial value for the cell.
     /// Either a two or a four.
     fn spawn_value(&self) -> usize {
+        const CHANCE_OF_FOUR: f64 = 0.1;
         let mut rng = rand::thread_rng();
-        return match rng.gen_bool(LIKELIHOOD_SPAWN_FOUR) {
+        match rng.gen_bool(CHANCE_OF_FOUR) {
             true => 4,
             false => 2,
-        };
+        }
     }
 }
 
