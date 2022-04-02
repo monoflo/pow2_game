@@ -316,7 +316,7 @@ impl Board {
 
 impl Board {
     fn shift_horizontal(&mut self, dir: Move) -> Result<(), ()> {
-        static VALID: [Move; 2] = [Move::ShiftLeft, Move::ShiftRight];
+        const VALID: [Move; 2] = [Move::ShiftLeft, Move::ShiftRight];
 
         if !VALID.contains(&dir) {
             return Err(());
@@ -328,7 +328,7 @@ impl Board {
 
 impl Board {
     fn shift_vertical(&mut self, dir: Move) -> Result<(), ()> {
-        static VALID: [Move; 2] = [Move::ShiftUp, Move::ShiftDown];
+        const VALID: [Move; 2] = [Move::ShiftUp, Move::ShiftDown];
 
         if !VALID.contains(&dir) {
             return Err(());
