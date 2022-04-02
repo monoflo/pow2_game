@@ -146,18 +146,18 @@ impl Cell {
     }
 }
 
-/// Affirm that `Cell::despawn()` will reset the value of the cell to zero.
+/// Affirm that `Cell::despawn()` will result in an error if the cell is already empty.
 #[test]
-fn test_despawn_nonzero() {
+fn test_despawn_empty() {
+    Cell(0).despawn().unwrap_err();
+}
+
+/// Affirm that `Cell::despawn()` will reset the value of a non-empty cell to zero.
+#[test]
+fn test_despawn_nonempty() {
     let mut cell = Cell(2);
     cell.despawn().unwrap();
     assert_eq!(0, cell.0);
-}
-
-#[test]
-fn test_despawn_zero() {
-    let mut cell = Cell(0);
-    cell.despawn().unwrap_err();
 }
 
 impl Cell {
