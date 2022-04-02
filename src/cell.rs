@@ -72,8 +72,7 @@ impl Cell {
     /// Either a two or a four.
     fn spawn_value(&self) -> usize {
         const CHANCE_OF_FOUR: f64 = 0.1;
-        let mut rng = rand::thread_rng();
-        match rng.gen_bool(CHANCE_OF_FOUR) {
+        match rand::thread_rng().gen_bool(CHANCE_OF_FOUR) {
             true => 4,
             false => 2,
         }
