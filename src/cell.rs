@@ -179,41 +179,53 @@ impl Cell {
 }
 
 #[test]
+/// Affirm that `Cell::grow()` will result in an error for an empty cell.
+fn test_grow_from_empty() {
+    Cell(0).grow().unwrap_err();
+}
+
+#[test]
+/// Affirm that `Cell::grow()` will return four for a cell with the value of two.
 fn test_grow_from_two() {
-    let mut cell = Cell(2);
+    const INIT: usize = 2;
+    const EXPECTED: usize = 4;
+    let mut cell = Cell(INIT);
     cell.grow().unwrap();
-    assert_eq!(4, cell.0);
+    assert_eq!(EXPECTED, cell.0);
 }
 
 #[test]
+/// Affirm that `Cell::grow()` will return eight for a cell with the value of four.
 fn test_grow_from_four() {
-    let mut cell = Cell(4);
+    const INIT: usize = 4;
+    const EXPECTED: usize = 8;
+    let mut cell = Cell(INIT);
     cell.grow().unwrap();
-    assert_eq!(8, cell.0);
+    assert_eq!(EXPECTED, cell.0);
 }
 
 #[test]
-fn test_grow_from_zero() {
-    let mut cell = Cell(0);
-    cell.grow().unwrap_err();
-}
-
-#[test]
+/// Affirm that `Cell::grow()` will succeed if the cell value is equal to the second
+/// most-significant set bit.
 fn test_grow_from_second_highest_bit_set() {
-    let mut cell = Cell(1 << (usize::BITS - 2));
-    cell.grow().unwrap();
+    const INIT: usize = 1 << (usize::BITS - 2);
+    Cell(INIT).grow().unwrap();
 }
 
 #[test]
+/// Affirm that `Cell::grow()` will result in an error if the cell value is equal to the
+/// most-significant set bit.
 fn test_grow_from_highest_bit_set() {
-    let mut cell = Cell(1 << (usize::BITS - 1));
-    cell.grow().unwrap_err();
+    const INIT: usize = 1 << (usize::BITS - 1);
+    Cell(INIT).grow().unwrap_err();
 }
 
 #[test]
+/// Affirm that `Cell::grow()` will result in an error if the cell value is equal to the type
+/// maximum.
 fn test_grow_from_max_val() {
-    let mut cell = Cell(usize::MAX);
-    cell.grow().unwrap_err();
+    const INIT: usize = usize::MAX;
+    Cell(INIT).grow().unwrap_err();
 }
 
 impl Cell {
