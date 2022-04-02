@@ -10,10 +10,10 @@ impl std::fmt::Display for Cell {
     }
 }
 
+/// Affirm that the implementation of the `Display` trait for `Cell` works properly.
 #[test]
 fn test_to_string() {
-    let cell = Cell(64);
-    assert_eq!("64", cell.to_string());
+    assert_eq!("64", Cell(64).to_string());
 }
 
 impl Cell {
@@ -24,17 +24,16 @@ impl Cell {
     }
 }
 
+/// Affirm that `Cell::is_empty()` returns true for a cell having a value of zero.
 #[test]
-fn test_is_empty_after_new() {
-    let cell = Cell::new();
-    assert!(cell.is_empty());
+fn test_is_empty_on_empty() {
+    assert!(Cell(0).is_empty());
 }
 
+/// Affirm that `Cell::is_empty()` returns false for a cell having a non-zero value.
 #[test]
-fn test_is_empty_after_spawn() {
-    let mut cell = Cell::new();
-    cell.spawn().unwrap();
-    assert!(!cell.is_empty());
+fn test_is_empty_on_nonempty() {
+    assert!(!Cell(2).is_empty());
 }
 
 impl Cell {
@@ -45,14 +44,11 @@ impl Cell {
     }
 }
 
+/// Affirm that `Cell::value()` returns the value that the cell holds.
 #[test]
-fn test_value_zero() {
-    assert_eq!(0, Cell(0).value());
-}
-
-#[test]
-fn test_value_two() {
-    assert_eq!(2, Cell(2).value());
+fn test_value() {
+    const EXPECTED: usize = 4;
+    assert_eq!(EXPECTED, Cell(EXPECTED).value());
 }
 
 impl Cell {
