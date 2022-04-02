@@ -9,20 +9,20 @@ use cell::Cell;
 use movement::Move;
 
 fn parse_input(inp: &str) -> Result<Move, ()> {
-    return match inp {
+    match inp {
         "w" => Ok(Move::ShiftUp),
         "a" => Ok(Move::ShiftLeft),
         "s" => Ok(Move::ShiftDown),
         "d" => Ok(Move::ShiftRight),
         "u" => Ok(Move::Undo),
         _ => Err(()),
-    };
+    }
 }
 
 fn main() {
     let mut board = Board::new();
 
-    println!("{}", board.to_string());
+    println!("{}", board);
 
     loop {
         let mut input = String::new();
@@ -33,6 +33,6 @@ fn main() {
         let input = input.to_lowercase();
         let mov: Move = parse_input(&input).expect("invalid move type");
         board.movement(mov).unwrap();
-        println!("{}", board.to_string());
+        println!("{}", board);
     }
 }

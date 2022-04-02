@@ -81,6 +81,7 @@ fn test_new() {
 }
 
 impl Board {
+    #[allow(dead_code)]
     /// Retrieves cells in the given col matching the specified emptiness.
     ///
     /// # Arguments
@@ -256,6 +257,7 @@ fn test_spawn_at_invalid_row() {
 }
 
 impl Board {
+    #[allow(dead_code)]
     /// Spawns new cells on the game board at the specified location(s).
     ///
     /// # Arguments

@@ -37,6 +37,7 @@ fn test_is_empty_on_nonempty() {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     #[inline(always)]
     /// Returns the value held by the cell.
     pub fn value(&self) -> usize {
@@ -66,6 +67,7 @@ fn test_new() {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     /// Attempts to spawn the specified value into the cell.
     /// Fails if the cell is already non-empty.
     ///
@@ -78,7 +80,7 @@ impl Cell {
         }
 
         self.0 = val;
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -112,7 +114,7 @@ impl Cell {
         };
 
         self.0 = val;
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -132,6 +134,7 @@ fn test_spawn_empty() {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     /// Reverts the cell back to an empty state.
     fn despawn(&mut self) -> Result<(), ()> {
         if self.is_empty() {
@@ -157,6 +160,7 @@ fn test_despawn_nonempty() {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     /// Increases the value of the cell by a power of two.
     fn grow(&mut self) -> Result<(), ()> {
         if self.is_empty() {
@@ -225,6 +229,7 @@ fn test_grow_from_max_val() {
 }
 
 impl Cell {
+    #[allow(dead_code)]
     /// Merge the current cell with another.
     /// If successful, `self` will grow while the `other` will be despawned.
     /// Fails if the cell values are not equal to each other or if one is empty.
@@ -237,7 +242,7 @@ impl Cell {
             return Err(());
         }
 
-        self.grow();
+        self.grow().unwrap();
         other.despawn().unwrap();
 
         Ok(())
