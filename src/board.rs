@@ -304,11 +304,35 @@ impl Board {
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
         match mov {
-            Move::ShiftDown => todo!("shift down"),
-            Move::ShiftLeft => todo!("shift left"),
-            Move::ShiftRight => todo!("shift right"),
-            Move::ShiftUp => todo!("shift up"),
+            Move::ShiftDown => self.shift_vertical(mov),
+            Move::ShiftLeft => self.shift_horizontal(mov),
+            Move::ShiftRight => self.shift_horizontal(mov),
+            Move::ShiftUp => self.shift_vertical(mov),
             Move::Undo => todo!("undo move"),
         }
+    }
+}
+
+impl Board {
+    fn shift_horizontal(&mut self, dir: Move) -> Result<(), ()> {
+        static VALID: [Move; 2] = [Move::ShiftLeft, Move::ShiftRight];
+
+        if !VALID.contains(&dir) {
+            return Err(());
+        }
+
+        todo!("horizontal shifts have not been implemented");
+    }
+}
+
+impl Board {
+    fn shift_vertical(&mut self, dir: Move) -> Result<(), ()> {
+        static VALID: [Move; 2] = [Move::ShiftUp, Move::ShiftDown];
+
+        if !VALID.contains(&dir) {
+            return Err(());
+        }
+
+        todo!("vertical shifts have not been implemented");
     }
 }
