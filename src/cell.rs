@@ -6,7 +6,7 @@ pub struct Cell(usize);
 
 impl std::fmt::Display for Cell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
+        write!(f, "{}", self.value())
     }
 }
 
@@ -20,7 +20,7 @@ impl Cell {
     #[inline(always)]
     /// Returns whether the cell is empty.
     pub fn is_empty(&self) -> bool {
-        self.0 == 0
+        self.value() == 0
     }
 }
 
@@ -63,7 +63,7 @@ impl Cell {
 #[test]
 fn test_new() {
     let cell = Cell::new();
-    assert_eq!(0, cell.0);
+    assert_eq!(0, cell.value());
 }
 
 impl Cell {
@@ -96,7 +96,7 @@ fn test_spawn_value_empty() {
     const EXPECTED: usize = 2;
     let mut cell = Cell(0);
     cell.spawn_value(EXPECTED).unwrap();
-    assert_eq!(EXPECTED, cell.0);
+    assert_eq!(EXPECTED, cell.value());
 }
 
 impl Cell {
@@ -130,7 +130,7 @@ fn test_spawn_empty() {
     static VALID: [usize; 2] = [2, 4];
     let mut cell = Cell(0);
     cell.spawn().unwrap();
-    assert!(VALID.contains(&cell.0));
+    assert!(VALID.contains(&cell.value()));
 }
 
 impl Cell {
@@ -156,7 +156,7 @@ fn test_despawn_empty() {
 fn test_despawn_nonempty() {
     let mut cell = Cell(2);
     cell.despawn().unwrap();
-    assert_eq!(0, cell.0);
+    assert_eq!(0, cell.value());
 }
 
 impl Cell {
@@ -191,7 +191,7 @@ fn test_grow_from_two() {
     const EXPECTED: usize = 4;
     let mut cell = Cell(INIT);
     cell.grow().unwrap();
-    assert_eq!(EXPECTED, cell.0);
+    assert_eq!(EXPECTED, cell.value());
 }
 
 #[test]
@@ -201,7 +201,7 @@ fn test_grow_from_four() {
     const EXPECTED: usize = 8;
     let mut cell = Cell(INIT);
     cell.grow().unwrap();
-    assert_eq!(EXPECTED, cell.0);
+    assert_eq!(EXPECTED, cell.value());
 }
 
 #[test]
@@ -238,7 +238,7 @@ impl Cell {
     ///
     /// * `other` - the other cell to merge with (that will be despawned)
     pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
-        if self.is_empty() || self.0 != other.0 {
+        if self.is_empty() || self.value() != other.value() {
             return Err(());
         }
 
