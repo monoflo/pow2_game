@@ -70,43 +70,69 @@ fn test_new() {
 }
 
 impl Cell {
-    /// Generates a new, intial value for the cell.
-    /// Either a two or a four.
-    fn spawn_value(&self) -> usize {
-        const CHANCE_OF_FOUR: f64 = 0.1;
-        match rand::thread_rng().gen_bool(CHANCE_OF_FOUR) {
-            true => 4,
-            false => 2,
+    /// Attempts to spawn the specified value into the cell.
+    /// Fails if the cell is already non-empty.
+    ///
+    /// # Arguments
+    ///
+    /// * `val` - the value to spawn into the cell
+    pub fn spawn_value(&mut self, val: usize) -> Result<(), ()> {
+        if !self.is_empty() {
+            return Err(());
         }
+
+        self.0 = val;
+        return Ok(());
     }
+}
+
+/// Affirm that `Cell::spawn_value()` will result in an error if the cell is non-empty.
+#[test]
+fn test_spawn_value_nonempty() {
+    Cell(2).spawn_value(2).unwrap_err();
+}
+
+/// Affirm that `Cell::spawn_value()` will initialize an empty cell to that of the specified value.
+#[test]
+fn test_spawn_value_empty() {
+    const EXPECTED: usize = 2;
+    let mut cell = Cell(0);
+    cell.spawn_value(EXPECTED).unwrap();
+    assert_eq!(EXPECTED, cell.0);
 }
 
 impl Cell {
-    /// Attempts to spawn a non-empty cell.
-    /// Fails if the cell already stores a non-zero value.
+    /// Attempts to randomly spawn a value of either two or four into the cell.
+    /// Fails if the cell is already non-empty.
     pub fn spawn(&mut self) -> Result<(), ()> {
-        if self.0 == 0 {
-            self.0 = self.spawn_value();
-            return Ok(());
+        const CHANCE_OF_FOUR: f64 = 0.1;
+        if !self.is_empty() {
+            return Err(());
         }
-        Err(())
+
+        let val = match rand::thread_rng().gen_bool(CHANCE_OF_FOUR) {
+            true => 4,
+            false => 2,
+        };
+
+        self.0 = val;
+        return Ok(());
     }
 }
 
-/// Affirm that `Cell::spawn()` can initialize a zero cell value to either two or four.
+/// Affirm that `Cell::spawn()` will result in an error if the cell is non-empty.
 #[test]
-fn test_spawn_zero() {
-    let mut cell = Cell(0);
-    cell.spawn().unwrap();
-    assert_ne!(0, cell.0);
-    assert!(cell.0 == 2 || cell.0 == 4);
+fn test_spawn_nonempty() {
+    Cell(2).spawn().unwrap_err();
 }
 
-/// Affirm that `Cell::spawn()` will result in an error if the cell value is non-zero.
+/// Affirm that `Cell::spawn()` will initialize an empty cell to either two or four.
 #[test]
-fn test_spawn_nonzero() {
-    let mut cell = Cell(2);
-    cell.spawn().unwrap_err();
+fn test_spawn_empty() {
+    static VALID: [usize; 2] = [2, 4];
+    let mut cell = Cell(0);
+    cell.spawn().unwrap();
+    assert!(VALID.contains(&cell.0));
 }
 
 impl Cell {
