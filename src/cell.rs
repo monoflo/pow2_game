@@ -138,7 +138,7 @@ fn test_spawn_empty() {
 impl Cell {
     /// Reverts the cell back to an empty state.
     fn despawn(&mut self) -> Result<(), ()> {
-        if self.0 == 0 {
+        if self.is_empty() {
             return Err(());
         }
         self.0 = 0;
@@ -163,7 +163,7 @@ fn test_despawn_zero() {
 impl Cell {
     /// Increases the value of the cell by a power of two.
     fn grow(&mut self) -> Result<(), ()> {
-        if self.0 == 0 {
+        if self.is_empty() {
             return Err(());
         }
 
