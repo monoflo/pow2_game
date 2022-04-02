@@ -59,7 +59,8 @@ impl Board {
     /// Returns a new instance of a game board.
     pub fn new() -> Self {
         let mut inst = Board::empty();
-        inst.spawn().unwrap();
+        inst.spawn()
+            .expect("failed to spawn a cell on the empty board");
         inst
     }
 }
