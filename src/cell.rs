@@ -1,5 +1,20 @@
 use rand::Rng;
 
+#[derive(Debug, PartialEq)]
+/// Denotes the result of a cell merge operation.
+pub enum MergeResult {
+    /// mergee and merger are both empty
+    BothEmpty,
+    /// mergee and merger are both non-empty and of equal value
+    Combine,
+    /// mergee is non-empty whereas merger is empty
+    OtherEmpty,
+    /// mergee is empty whereas merger is non-empty
+    SelfEmpty,
+    /// mergee and merger are both non-empty but of dissimilar value
+    UnlikeValues,
+}
+
 /// The representation of a cell on the game board.
 #[derive(Copy, Clone, Debug)]
 pub struct Cell(usize);
@@ -230,22 +245,28 @@ fn test_grow_from_max_val() {
 
 impl Cell {
     #[allow(dead_code)]
-    /// Merge the current cell with another.
-    /// If successful, `self` will grow while the `other` will be despawned.
-    /// Fails if the cell values are not equal to each other or if one is empty.
+    /// Attempts to merge the cell with another.
+    /// Succeeds iff both cells are non-empty and equal in value.
+    /// If successful, the cell's value will grow while the other cell will despawn.
     ///
     /// # Arguments
     ///
     /// * `other` - the other cell to merge with (that will be despawned)
-    pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
-        if self.is_empty() || self.value() != other.value() {
-            return Err(());
+    pub fn merge(&mut self, other: &mut Self) -> Result<MergeResult, MergeResult> {
+        match (self.is_empty(), other.is_empty()) {
+            (false, true) => return Err(MergeResult::OtherEmpty),
+            (true, false) => return Err(MergeResult::SelfEmpty),
+            (true, true) => return Err(MergeResult::BothEmpty),
+            _ => (),
+        };
+
+        if self.value() != other.value() {
+            return Err(MergeResult::UnlikeValues);
         }
 
         self.grow().unwrap();
         other.despawn().unwrap();
-
-        Ok(())
+        Ok(MergeResult::Combine)
     }
 }
 
@@ -255,38 +276,39 @@ impl Cell {
 fn test_merge_both_empty() {
     let mut merger = Cell::new();
     let mut mergee = Cell::new();
-    mergee.merge(&mut merger).unwrap_err();
+    assert_eq!(Err(MergeResult::BothEmpty), mergee.merge(&mut merger));
 }
 
-/// Affirm that an error will occur if `Cell::merge()` is performed *on* a cell that has not
-/// been spawned.
+/// Affirm that an error will occur if `Cell::merge()` is performed on a cell that is empty against
+/// another cell that is empty.
 #[test]
-fn test_merge_as_empty() {
+fn test_merge_self_empty() {
     let mut merger = Cell::new();
     let mut mergee = Cell::new();
     merger.spawn().unwrap();
-    mergee.merge(&mut merger).unwrap_err();
+    assert_eq!(Err(MergeResult::SelfEmpty), mergee.merge(&mut merger));
 }
 
-/// Affirm that an error will occur if `Cell::merge()` is performed *against* a cell that has
-/// not been spawned.
+/// Affirm that `Cell::merge()` will succeed when performed on a non-empty cell against another
+/// cell that is empty.
 #[test]
-fn test_merge_with_empty() {
+fn test_merge_other_empty() {
     let mut merger = Cell::new();
     let mut mergee = Cell::new();
     mergee.spawn().unwrap();
-    mergee.merge(&mut merger).unwrap_err();
+    assert_eq!(Err(MergeResult::OtherEmpty), mergee.merge(&mut merger));
 }
 
-/// Affirm that `Cell::merge()` will succeed when performed on two cells of equal value, and
-/// also that their values will update appropriately.
+/// Affirm that `Cell::merge()` will succeed when performed on two non-empty cells of equal value,
+/// and also that their values will update appropriately.
 #[test]
 fn test_merge_with_equal() {
-    let mut merger = Cell(2);
-    let mut mergee = Cell(2);
-    mergee.merge(&mut merger).unwrap();
-    assert_eq!(4, mergee.0);
-    assert_eq!(0, merger.0);
+    const V: usize = 2;
+    let mut merger = Cell(V);
+    let mut mergee = Cell(V);
+    assert_eq!(Ok(MergeResult::Combine), mergee.merge(&mut merger));
+    assert_eq!(V * 2, mergee.value());
+    assert_eq!(0, merger.value());
 }
 
 /// Affirm that an error will occur if `Cell::merge()` is performed on two cells of unequal
@@ -295,5 +317,5 @@ fn test_merge_with_equal() {
 fn test_merge_with_unequal() {
     let mut merger = Cell(2);
     let mut mergee = Cell(4);
-    mergee.merge(&mut merger).unwrap_err();
+    assert_eq!(Err(MergeResult::UnlikeValues), mergee.merge(&mut merger));
 }
