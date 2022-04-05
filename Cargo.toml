@@ -1,5 +1,5 @@
 [package]
-name = "pow2_game"
+name = "rust2048"
 version = "0.1.0"
 edition = "2021"
 
