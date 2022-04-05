@@ -20,7 +20,7 @@ fn parse_input(inp: &str) -> Result<Move, ()> {
 }
 
 fn main() {
-    let mut board = Board::new();
+    let mut board = Board::default();
 
     println!("{}", board);
 

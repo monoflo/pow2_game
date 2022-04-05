@@ -1,27 +1,21 @@
 use rand::Rng;
 
-#[derive(Debug, PartialEq)]
-/// Denotes the result of a cell merge operation.
-pub enum MergeResult {
-    /// mergee and merger are both empty
-    BothEmpty,
-    /// mergee and merger are both non-empty and of equal value
-    Combine,
-    /// mergee is non-empty whereas merger is empty
-    OtherEmpty,
-    /// mergee is empty whereas merger is non-empty
-    SelfEmpty,
-    /// mergee and merger are both non-empty but of dissimilar value
-    UnlikeValues,
-}
-
 /// The representation of a cell on the game board.
-#[derive(Copy, Clone, Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Cell(usize);
 
+impl Cell {
+    /// Returns the value held by the cell.
+    #[inline(always)]
+    pub fn value(&self) -> usize {
+        self.0
+    }
+}
+
+/// Implementation of the `Display` trait for `Cell`.
 impl std::fmt::Display for Cell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.value())
+        write!(f, "{}", self.0)
     }
 }
 
@@ -31,272 +25,131 @@ fn test_to_string() {
     assert_eq!("64", Cell(64).to_string());
 }
 
-impl Cell {
-    #[inline(always)]
-    /// Returns whether the cell is empty.
-    pub fn is_empty(&self) -> bool {
-        self.value() == 0
-    }
+/// Implementation of the `Drop` trait for `Cell`.
+impl Drop for Cell {
+    fn drop(&mut self) {}
 }
 
-/// Affirm that `Cell::is_empty()` returns true for a cell having a value of zero.
-#[test]
-fn test_is_empty_on_empty() {
-    assert!(Cell(0).is_empty());
-}
-
-/// Affirm that `Cell::is_empty()` returns false for a cell having a non-zero value.
-#[test]
-fn test_is_empty_on_nonempty() {
-    assert!(!Cell(2).is_empty());
-}
-
-impl Cell {
-    #[allow(dead_code)]
-    #[inline(always)]
-    /// Returns the value held by the cell.
-    pub fn value(&self) -> usize {
-        self.0
-    }
-}
-
-/// Affirm that `Cell::value()` returns the value that the cell holds.
-#[test]
-fn test_value() {
-    const EXPECTED: usize = 4;
-    assert_eq!(EXPECTED, Cell(EXPECTED).value());
-}
-
-impl Cell {
-    /// Returns a new, empty instance of a cell.
-    pub fn new() -> Self {
-        Self(0)
-    }
-}
-
-/// Affirm that `Cell::new()` initializes cells with a zero value.
-#[test]
-fn test_new() {
-    let cell = Cell::new();
-    assert_eq!(0, cell.value());
-}
-
-impl Cell {
-    #[allow(dead_code)]
-    /// Attempts to spawn the specified value into the cell.
-    /// Fails if the cell is already non-empty.
-    ///
-    /// # Arguments
-    ///
-    /// * `val` - the value to spawn into the cell
-    pub fn spawn_value(&mut self, val: usize) -> Result<(), ()> {
-        if !self.is_empty() {
-            return Err(());
-        }
-
-        self.0 = val;
-        Ok(())
-    }
-}
-
-/// Affirm that `Cell::spawn_value()` will result in an error if the cell is non-empty.
-#[test]
-fn test_spawn_value_nonempty() {
-    Cell(2).spawn_value(2).unwrap_err();
-}
-
-/// Affirm that `Cell::spawn_value()` will initialize an empty cell to that of the specified value.
-#[test]
-fn test_spawn_value_empty() {
-    const EXPECTED: usize = 2;
-    let mut cell = Cell(0);
-    cell.spawn_value(EXPECTED).unwrap();
-    assert_eq!(EXPECTED, cell.value());
-}
-
-impl Cell {
-    /// Attempts to randomly spawn a value of either two or four into the cell.
-    /// Fails if the cell is already non-empty.
-    pub fn spawn(&mut self) -> Result<(), ()> {
+/// Implementation of the `Default` trait for `Cell`.
+impl Default for Cell {
+    /// Randomly initializes the value of the cell to either two or four.
+    fn default() -> Self {
         const CHANCE_OF_FOUR: f64 = 0.1;
-        if !self.is_empty() {
-            return Err(());
-        }
-
-        let val = match rand::thread_rng().gen_bool(CHANCE_OF_FOUR) {
+        Self(match rand::thread_rng().gen_bool(CHANCE_OF_FOUR) {
             true => 4,
             false => 2,
-        };
-
-        self.0 = val;
-        Ok(())
+        })
     }
 }
 
-/// Affirm that `Cell::spawn()` will result in an error if the cell is non-empty.
+/// Affirm that `Cell::default()` will initialize the value to either two or four.
 #[test]
-fn test_spawn_nonempty() {
-    Cell(2).spawn().unwrap_err();
-}
-
-/// Affirm that `Cell::spawn()` will initialize an empty cell to either two or four.
-#[test]
-fn test_spawn_empty() {
-    static VALID: [usize; 2] = [2, 4];
-    let mut cell = Cell(0);
-    cell.spawn().unwrap();
-    assert!(VALID.contains(&cell.value()));
+fn test_default() {
+    assert!([2, 4].contains(&Cell::default().0));
 }
 
 impl Cell {
-    #[allow(dead_code)]
-    /// Reverts the cell back to an empty state.
-    fn despawn(&mut self) -> Result<(), ()> {
-        if self.is_empty() {
-            return Err(());
-        }
-        self.0 = 0;
-        Ok(())
-    }
-}
-
-/// Affirm that `Cell::despawn()` will result in an error if the cell is already empty.
-#[test]
-fn test_despawn_empty() {
-    Cell(0).despawn().unwrap_err();
-}
-
-/// Affirm that `Cell::despawn()` will reset the value of a non-empty cell to zero.
-#[test]
-fn test_despawn_nonempty() {
-    let mut cell = Cell(2);
-    cell.despawn().unwrap();
-    assert_eq!(0, cell.value());
-}
-
-impl Cell {
-    #[allow(dead_code)]
     /// Increases the value of the cell by a power of two.
     fn grow(&mut self) -> Result<(), ()> {
-        if self.is_empty() {
+        const MSB_SET: usize = 1 << (usize::BITS - 1);
+
+        // assert that the value is a power of two greater than one
+        assert_eq!(1, self.0.count_ones());
+        assert!(self.0 > 1);
+
+        if MSB_SET == self.0 {
             return Err(());
         }
 
-        let (result, overflow) = self.0.overflowing_mul(2);
-
-        if overflow {
-            return Err(());
-        }
-
-        self.0 = result;
+        self.0 <<= 1;
         Ok(())
     }
 }
 
+/// Affirm that `Cell::grow()` will panic if the cell unexpectedly has a value of zero.
 #[test]
-/// Affirm that `Cell::grow()` will result in an error for an empty cell.
-fn test_grow_from_empty() {
-    Cell(0).grow().unwrap_err();
+#[should_panic]
+fn test_grow_0() {
+    Cell(0).grow();
 }
 
+/// Affirm that `Cell::grow()` will panic if the cell unexpectedly has a value of one.
 #[test]
+#[should_panic]
+fn test_grow_1() {
+    Cell(1).grow();
+}
+
 /// Affirm that `Cell::grow()` will return four for a cell with the value of two.
-fn test_grow_from_two() {
-    const INIT: usize = 2;
-    const EXPECTED: usize = 4;
-    let mut cell = Cell(INIT);
+#[test]
+fn test_grow_2() {
+    let mut cell = Cell(2);
     cell.grow().unwrap();
-    assert_eq!(EXPECTED, cell.value());
+    assert_eq!(4, cell.0);
 }
 
+/// Affirm that `Cell::grow()` will panic if the cell unexpectedly has a value that is a non-power
+/// of two.
 #[test]
+#[should_panic]
+fn test_grow_3() {
+    Cell(3).grow();
+}
+
 /// Affirm that `Cell::grow()` will return eight for a cell with the value of four.
-fn test_grow_from_four() {
-    const INIT: usize = 4;
-    const EXPECTED: usize = 8;
-    let mut cell = Cell(INIT);
+#[test]
+fn test_grow_4() {
+    let mut cell = Cell(4);
     cell.grow().unwrap();
-    assert_eq!(EXPECTED, cell.value());
+    assert_eq!(8, cell.0);
 }
 
-#[test]
 /// Affirm that `Cell::grow()` will succeed if the cell value is equal to the second
 /// most-significant set bit.
-fn test_grow_from_second_highest_bit_set() {
-    const INIT: usize = 1 << (usize::BITS - 2);
-    Cell(INIT).grow().unwrap();
+#[test]
+fn test_grow_second_MSB() {
+    const V: usize = 1 << (usize::BITS - 2);
+    const E: usize = 1 << (usize::BITS - 1);
+    let mut cell = Cell(V);
+    cell.grow().unwrap();
+    assert_eq!(E, cell.0);
 }
 
-#[test]
 /// Affirm that `Cell::grow()` will result in an error if the cell value is equal to the
 /// most-significant set bit.
-fn test_grow_from_highest_bit_set() {
-    const INIT: usize = 1 << (usize::BITS - 1);
-    Cell(INIT).grow().unwrap_err();
+#[test]
+fn test_grow_MSB() {
+    const V: usize = 1 << (usize::BITS - 1);
+    Cell(V).grow().unwrap_err();
 }
 
+/// Affirm that `Cell::grow()` will panic if the cell unexpectedly has a value that is a non-power
+/// of two.
 #[test]
-/// Affirm that `Cell::grow()` will result in an error if the cell value is equal to the type
-/// maximum.
-fn test_grow_from_max_val() {
-    const INIT: usize = usize::MAX;
-    Cell(INIT).grow().unwrap_err();
+#[should_panic]
+fn test_grow_max() {
+    Cell(usize::MAX).grow();
 }
 
 impl Cell {
-    #[allow(dead_code)]
-    /// Attempts to merge the cell with another.
-    /// Succeeds iff both cells are non-empty and equal in value.
-    /// If successful, the cell's value will grow while the other cell will despawn.
+    /// Iff the cells have equal value, then `self` will grow whereas `other` will be dropped.
     ///
     /// # Arguments
     ///
-    /// * `other` - the other cell to merge with (that will be despawned)
-    pub fn merge(&mut self, other: &mut Self) -> Result<MergeResult, MergeResult> {
-        match (self.is_empty(), other.is_empty()) {
-            (false, true) => return Err(MergeResult::OtherEmpty),
-            (true, false) => return Err(MergeResult::SelfEmpty),
-            (true, true) => return Err(MergeResult::BothEmpty),
-            _ => (),
-        };
-
-        if self.value() != other.value() {
-            return Err(MergeResult::UnlikeValues);
+    /// * `other` - the other cell to merge with (that will be dropped on merge)
+    ///
+    /// # Notes
+    ///
+    /// * `other` should be assigned to the result of the function call
+    pub fn merge(&mut self, other: Self) -> Option<Cell> {
+        if *self == other {
+            self.grow().unwrap();
+            drop(other);
+            return None;
         }
 
-        self.grow().unwrap();
-        other.despawn().unwrap();
-        Ok(MergeResult::Combine)
+        Some(other)
     }
-}
-
-/// Affirm that an error will occur if `Cell::merge()` is performed on two cells that are both
-/// empty.
-#[test]
-fn test_merge_both_empty() {
-    let mut merger = Cell::new();
-    let mut mergee = Cell::new();
-    assert_eq!(Err(MergeResult::BothEmpty), mergee.merge(&mut merger));
-}
-
-/// Affirm that an error will occur if `Cell::merge()` is performed on a cell that is empty against
-/// another cell that is empty.
-#[test]
-fn test_merge_self_empty() {
-    let mut merger = Cell::new();
-    let mut mergee = Cell::new();
-    merger.spawn().unwrap();
-    assert_eq!(Err(MergeResult::SelfEmpty), mergee.merge(&mut merger));
-}
-
-/// Affirm that `Cell::merge()` will succeed when performed on a non-empty cell against another
-/// cell that is empty.
-#[test]
-fn test_merge_other_empty() {
-    let mut merger = Cell::new();
-    let mut mergee = Cell::new();
-    mergee.spawn().unwrap();
-    assert_eq!(Err(MergeResult::OtherEmpty), mergee.merge(&mut merger));
 }
 
 /// Affirm that `Cell::merge()` will succeed when performed on two non-empty cells of equal value,
@@ -304,18 +157,22 @@ fn test_merge_other_empty() {
 #[test]
 fn test_merge_with_equal() {
     const V: usize = 2;
-    let mut merger = Cell(V);
     let mut mergee = Cell(V);
-    assert_eq!(Ok(MergeResult::Combine), mergee.merge(&mut merger));
-    assert_eq!(V * 2, mergee.value());
-    assert_eq!(0, merger.value());
+    let merger = mergee.merge(Cell(V));
+
+    assert_eq!(None, merger);
+    assert_eq!(V * 2, mergee.0);
 }
 
 /// Affirm that an error will occur if `Cell::merge()` is performed on two cells of unequal
 /// value.
 #[test]
 fn test_merge_with_unequal() {
-    let mut merger = Cell(2);
-    let mut mergee = Cell(4);
-    assert_eq!(Err(MergeResult::UnlikeValues), mergee.merge(&mut merger));
+    const A: usize = 2;
+    const B: usize = 4;
+    let mut mergee = Cell(A);
+    let mut merger = mergee.merge(Cell(B)).unwrap();
+
+    assert_eq!(A, mergee.0);
+    assert_eq!(B, merger.0);
 }

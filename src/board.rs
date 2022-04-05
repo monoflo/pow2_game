@@ -8,80 +8,49 @@ const BOARD_COLS: usize = 4;
 const BOARD_ROWS: usize = 4;
 
 /// Represents a row and column on the game board.
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 pub struct Coord(usize, usize);
 
 /// The representation of a game board.
+#[derive(Default)]
 pub struct Board {
-    /// The grid containing the cells of the board
-    grid: [[Cell; BOARD_COLS]; BOARD_ROWS],
+    /// The grid containing the cells of the board.
+    grid: [[Option<Cell>; BOARD_COLS]; BOARD_ROWS],
 }
 
-impl std::fmt::Display for Board {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut result = String::new();
-
-        for row in self.grid {
-            result += &row
-                .iter()
-                .map(|cell| cell.to_string())
-                .reduce(|a, b| a + " " + &b)
-                .unwrap();
-
-            result += "\n";
-        }
-
-        write!(f, "{}", result)
-    }
-}
-
-impl Board {
-    /// Returns a new, empty instance of a game board.
-    fn empty() -> Self {
-        Self {
-            grid: [[Cell::new(); BOARD_COLS]; BOARD_ROWS],
-        }
-    }
-}
-
-/// Affirm that `Board::empty()` initializes a board with all cells having `value = 0`.
+/// Affirm that the default board is instantiated with `None` in each cell.
 #[test]
-fn test_empty() {
-    let board = Board::empty();
-    assert!(board
+fn test_default() {
+    assert!(Board::default()
         .grid
         .iter()
-        .flat_map(|row| row.iter())
-        .all(|cell| cell.is_empty()));
+        .flatten()
+        .all(|cell| cell.is_none()));
 }
 
-impl Board {
-    /// Returns a new instance of a game board.
-    pub fn new() -> Self {
-        let mut inst = Board::empty();
-        inst.spawn()
-            .expect("failed to spawn a cell on the empty board");
-        inst
-    }
-}
-
-/// Affirm that `Board::new()` initializes a board with all cells having `value = 0`,
-/// except one.
-#[test]
-fn test_new() {
-    let board = Board::new();
-    let mut found = false;
-    for row in 0..BOARD_ROWS {
-        for col in 0..BOARD_COLS {
-            let is_empty = board.grid[row][col].is_empty();
-            assert!(is_empty || !found);
-            found = found || !is_empty;
-        }
+/// Implementation of the `Display` trait for `Board`.
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.grid
+                .iter()
+                .map(|row| row
+                    .iter()
+                    .map(|cell| match cell {
+                        Some(c) => c.to_string(),
+                        None => 0.to_string(),
+                    })
+                    .reduce(|a, b| a + " " + &b)
+                    .unwrap())
+                .reduce(|a, b| a + "\n" + &b)
+                .unwrap()
+        )
     }
 }
 
 impl Board {
-    #[allow(dead_code)]
     /// Retrieves cells in the given col matching the specified emptiness.
     ///
     /// # Arguments
@@ -95,7 +64,7 @@ impl Board {
     ) -> impl Iterator<Item = Coord> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
-            .filter(move |row| is_empty == self.grid[*row][col].is_empty())
+            .filter(move |row| is_empty == self.grid[*row][col].is_none())
             .map(move |row| Coord(row, col))
     }
 }
@@ -103,7 +72,7 @@ impl Board {
 /// Affirm that `Board::get_cells_by_emptiness_col()` functions properly on an empty board state.
 #[test]
 fn test_get_cells_by_emptiness_col_board_empty() {
-    let board = Board::empty();
+    let board = Board::default();
     for col in 0..BOARD_COLS {
         let vec = board
             .get_cells_by_emptiness_col(true, col)
@@ -126,7 +95,7 @@ impl Board {
     ) -> impl Iterator<Item = Coord> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
-            .filter(move |col| is_empty == self.grid[row][*col].is_empty())
+            .filter(move |col| is_empty == self.grid[row][*col].is_none())
             .map(move |col| Coord(row, col))
     }
 }
@@ -134,7 +103,7 @@ impl Board {
 /// Affirm that `Board::get_cells_by_emptiness_row()` functions properly on an empty board state.
 #[test]
 fn test_get_cells_by_emptiness_row_board_empty() {
-    let board = Board::empty();
+    let board = Board::default();
     for row in 0..BOARD_ROWS {
         let vec = board
             .get_cells_by_emptiness_row(true, row)
@@ -157,13 +126,13 @@ impl Board {
 /// Affirm that `Board::get_cells_by_emptiness()` functions properly on an empty board state.
 #[test]
 fn test_get_cells_by_emptiness_board_empty() {
-    let board = Board::empty();
+    let board = Board::default();
     let vec = board.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
     assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
 }
 
 impl Board {
-    /// Spawns a new cell on the game board at the specified location.
+    /// Attempts to spawn a new cell on the game board at the specified location.
     ///
     /// # Arguments
     ///
@@ -171,7 +140,15 @@ impl Board {
     fn spawn_at(&mut self, pos: Coord) -> Result<(), ()> {
         assert!(pos.0 < BOARD_ROWS);
         assert!(pos.1 < BOARD_COLS);
-        self.grid[pos.0][pos.1].spawn()
+
+        let mut gridpos = &mut self.grid[pos.0][pos.1];
+
+        if None == *gridpos {
+            *gridpos = Some(Cell::default());
+            return Ok(());
+        }
+
+        Err(())
     }
 }
 
@@ -179,7 +156,7 @@ impl Board {
 /// and then no more.
 #[test]
 fn test_spawn_at_exhaustive() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     for row in 0..BOARD_ROWS {
         for col in 0..BOARD_COLS {
             board.spawn_at(Coord(row, col)).unwrap();
@@ -191,49 +168,49 @@ fn test_spawn_at_exhaustive() {
 /// Affirm that only the bottom-rightmost cell will be non-empty if a cell is spawned there.
 #[test]
 fn test_spawn_at_corner_bottom_right() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at_many(vec![Coord(BOARD_ROWS - 1, BOARD_COLS - 1)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
-    assert!(!cells.next().unwrap().is_empty());
-    assert!(cells.all(|cell| cell.is_empty()));
+    assert!(cells.next().unwrap().is_some());
+    assert!(cells.all(|cell| cell.is_none()));
 }
 
 /// Affirm that only the bottom-leftmost cell will be non-empty if a cell is spawned there.
 #[test]
 fn test_spawn_at_corner_bottom_left() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at_many(vec![Coord(BOARD_ROWS - 1, 0)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
     for _ in 0..BOARD_ROWS - 1 {
         for _ in 0..BOARD_COLS {
-            assert!(cells.next().unwrap().is_empty());
+            assert!(cells.next().unwrap().is_none());
         }
     }
-    assert!(!cells.next().unwrap().is_empty());
-    assert!(cells.all(|cell| cell.is_empty()));
+    assert!(cells.next().unwrap().is_some());
+    assert!(cells.all(|cell| cell.is_none()));
 }
 
 /// Affirm that only the top-leftmost cell will be non-empty if a cell is spawned there.
 #[test]
 fn test_spawn_at_corner_top_left() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at_many(vec![Coord(0, 0)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
-    assert!(!cells.next().unwrap().is_empty());
-    assert!(cells.all(|cell| cell.is_empty()));
+    assert!(cells.next().unwrap().is_some());
+    assert!(cells.all(|cell| cell.is_none()));
 }
 
 /// Affirm that only the top-rightmost cell will be non-empty if a cell is spawned there.
 #[test]
 fn test_spawn_at_corner_top_right() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at_many(vec![Coord(0, BOARD_COLS - 1)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
     for _ in 0..BOARD_COLS - 1 {
-        assert!(cells.next().unwrap().is_empty());
+        assert!(cells.next().unwrap().is_none());
     }
-    assert!(!cells.next().unwrap().is_empty());
-    assert!(cells.all(|cell| cell.is_empty()));
+    assert!(cells.next().unwrap().is_some());
+    assert!(cells.all(|cell| cell.is_none()));
 }
 
 /// Affirm that attempting to spawn in an invalid column will fail.
@@ -242,7 +219,7 @@ fn test_spawn_at_corner_top_right() {
 fn test_spawn_at_invalid_col() {
     let col = usize::MAX;
     assert!(col < BOARD_COLS);
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at(Coord(0, col)).unwrap_err();
 }
 
@@ -252,7 +229,7 @@ fn test_spawn_at_invalid_col() {
 fn test_spawn_at_invalid_row() {
     let row = usize::MAX;
     assert!(row < BOARD_ROWS);
-    let mut board = Board::empty();
+    let mut board = Board::default();
     board.spawn_at(Coord(row, 0)).unwrap_err();
 }
 
@@ -272,7 +249,7 @@ impl Board {
 }
 
 impl Board {
-    /// Spawns a new cell on the game board.
+    /// Randomly spawns a new cell on the game board.
     fn spawn(&mut self) -> Result<(), ()> {
         let mut rng = rand::thread_rng();
         let empty_coords = self.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
@@ -289,7 +266,7 @@ impl Board {
 /// then no more.
 #[test]
 fn test_spawn_exhaustive() {
-    let mut board = Board::empty();
+    let mut board = Board::default();
     let num_cells = BOARD_ROWS.checked_mul(BOARD_COLS).unwrap();
 
     for _ in 0..num_cells {
@@ -299,6 +276,32 @@ fn test_spawn_exhaustive() {
     board.spawn().unwrap_err();
 }
 
+impl Board {
+    /// Returns a new instance of a game board.
+    pub fn new() -> Self {
+        let mut inst = Board::default();
+        inst.spawn()
+            .expect("failed to spawn a cell on the empty board");
+        inst
+    }
+}
+
+/// Affirm that `Board::new()` initializes a board with all cells having `value = 0`,
+/// except one.
+#[test]
+fn test_new() {
+    let board = Board::new();
+    let mut found = false;
+    for row in 0..BOARD_ROWS {
+        for col in 0..BOARD_COLS {
+            let is_empty = board.grid[row][col].is_none();
+            assert!(is_empty || !found);
+            found = found || !is_empty;
+        }
+    }
+}
+
+/*
 impl Board {
     /// Shifts the provided row in the direction specified.
     ///
@@ -477,6 +480,7 @@ impl Board {
         Ok(())
     }
 }
+*/
 
 impl Board {
     /// Handles movement on the game board.
@@ -485,11 +489,13 @@ impl Board {
     ///
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
+        // TODO: replace above `shift_{horizontal,vertical}` with common shift function,
+        // handle directionality in this function
         match mov {
-            Move::ShiftDown => self.shift_vertical(mov),
-            Move::ShiftLeft => self.shift_horizontal(mov),
-            Move::ShiftRight => self.shift_horizontal(mov),
-            Move::ShiftUp => self.shift_vertical(mov),
+            Move::ShiftDown => todo!("shift down"), // self.shift_vertical(mov),
+            Move::ShiftLeft => todo!("shift left"), // self.shift_horizontal(mov),
+            Move::ShiftRight => todo!("shift right"), // self.shift_horizontal(mov),
+            Move::ShiftUp => todo!("shift up"),     // self.shift_vertical(mov),
             Move::Undo => todo!("undo move"),
         }
     }
