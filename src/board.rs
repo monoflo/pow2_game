@@ -1,6 +1,6 @@
 use rand::seq::SliceRandom;
 
-use crate::{Cell, Move};
+use crate::{Cell, Direction, Move};
 
 /// Defines the number of columns in the board.
 const BOARD_COLS: usize = 4;
@@ -390,20 +390,27 @@ fn test_shift_2_4_2_4() {
 }
 
 impl Board {
+    fn board_undo(&mut self) -> Result<(), ()> {
+        todo!();
+    }
+}
+
+impl Board {
+    fn board_shift(&mut self, dir: Direction) -> Result<(), ()> {
+        todo!();
+    }
+}
+
+impl Board {
     /// Handles movement on the game board.
     ///
     /// # Arguments
     ///
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
-        // TODO: replace above `shift_{horizontal,vertical}` with common shift function,
-        // handle directionality in this function
         match mov {
-            Move::ShiftDown => todo!("shift down"), // self.shift_vertical(mov),
-            Move::ShiftLeft => todo!("shift left"), // self.shift_horizontal(mov),
-            Move::ShiftRight => todo!("shift right"), // self.shift_horizontal(mov),
-            Move::ShiftUp => todo!("shift up"),     // self.shift_vertical(mov),
-            Move::Undo => todo!("undo move"),
+            Move::Shift(dir) => self.board_shift(dir),
+            Move::Undo => self.board_undo(),
         }
     }
 }

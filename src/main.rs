@@ -6,14 +6,14 @@ use std::io::Write;
 
 use board::Board;
 use cell::Cell;
-use movement::Move;
+use movement::{Direction, Move};
 
 fn parse_input(inp: &str) -> Result<Move, ()> {
     match inp {
-        "w" => Ok(Move::ShiftUp),
-        "a" => Ok(Move::ShiftLeft),
-        "s" => Ok(Move::ShiftDown),
-        "d" => Ok(Move::ShiftRight),
+        "w" => Ok(Move::Shift(Direction::Up)),
+        "a" => Ok(Move::Shift(Direction::Left)),
+        "s" => Ok(Move::Shift(Direction::Down)),
+        "d" => Ok(Move::Shift(Direction::Right)),
         "u" => Ok(Move::Undo),
         _ => Err(()),
     }
