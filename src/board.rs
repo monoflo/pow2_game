@@ -421,10 +421,17 @@ fn test_shift_2_4_2_4() {
 }
 
 impl Board {
+    /// Attempt to undo the board to the previous move state.
     fn board_undo(&mut self) -> Result<(), ()> {
-        todo!();
+        if let Some(state) = self.history.pop() {
+            self.grid = state;
+            return Ok(());
+        }
+        Err(())
     }
 }
+
+// TODO: test `Board::board_undo`, probably rename the method to remove "board_" prefix
 
 impl Board {
     fn board_shift(&mut self, dir: Direction) -> Result<(), ()> {
