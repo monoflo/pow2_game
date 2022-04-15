@@ -7,9 +7,8 @@ const BOARD_COLS: usize = 4;
 /// Defines the number or rows in the board.
 const BOARD_ROWS: usize = 4;
 
-/// Represents a row and column on the game board.
-#[derive(Copy, Clone)]
-pub struct Coord(usize, usize);
+/// Type representing a `BoardGrid` position (i.e. row, column indices).
+type BoardCoord = (usize, usize);
 
 /// The representation of a game board.
 #[derive(Default)]
@@ -61,11 +60,11 @@ impl Board {
         &self,
         is_empty: bool,
         col: usize,
-    ) -> impl Iterator<Item = Coord> + '_ {
+    ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
             .filter(move |row| is_empty == self.grid[*row][col].is_none())
-            .map(move |row| Coord(row, col))
+            .map(move |row| (row, col))
     }
 }
 
@@ -76,7 +75,7 @@ fn test_get_cells_by_emptiness_col_board_empty() {
     for col in 0..BOARD_COLS {
         let vec = board
             .get_cells_by_emptiness_col(true, col)
-            .collect::<Vec<Coord>>();
+            .collect::<Vec<BoardCoord>>();
         assert_eq!(BOARD_COLS, vec.len());
     }
 }
@@ -92,11 +91,11 @@ impl Board {
         &self,
         is_empty: bool,
         row: usize,
-    ) -> impl Iterator<Item = Coord> + '_ {
+    ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
             .filter(move |col| is_empty == self.grid[row][*col].is_none())
-            .map(move |col| Coord(row, col))
+            .map(move |col| (row, col))
     }
 }
 
@@ -107,7 +106,7 @@ fn test_get_cells_by_emptiness_row_board_empty() {
     for row in 0..BOARD_ROWS {
         let vec = board
             .get_cells_by_emptiness_row(true, row)
-            .collect::<Vec<Coord>>();
+            .collect::<Vec<BoardCoord>>();
         assert_eq!(BOARD_COLS, vec.len());
     }
 }
@@ -118,7 +117,7 @@ impl Board {
     /// # Arguments
     ///
     /// * `is_empty` - whether the cell should be empty; search criteria
-    fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = Coord> + '_ {
+    fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = BoardCoord> + '_ {
         (0..BOARD_ROWS).flat_map(move |row| self.get_cells_by_emptiness_row(is_empty, row))
     }
 }
@@ -127,7 +126,9 @@ impl Board {
 #[test]
 fn test_get_cells_by_emptiness_board_empty() {
     let board = Board::default();
-    let vec = board.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
+    let vec = board
+        .get_cells_by_emptiness(true)
+        .collect::<Vec<BoardCoord>>();
     assert_eq!(BOARD_ROWS.checked_mul(BOARD_COLS).unwrap(), vec.len());
 }
 
@@ -137,7 +138,7 @@ impl Board {
     /// # Arguments
     ///
     /// * `pos` - the grid coordinate at which to spawn
-    fn spawn_at(&mut self, pos: Coord) -> Result<(), ()> {
+    fn spawn_at(&mut self, pos: BoardCoord) -> Result<(), ()> {
         assert!(pos.0 < BOARD_ROWS);
         assert!(pos.1 < BOARD_COLS);
 
@@ -159,7 +160,7 @@ fn test_spawn_at_exhaustive() {
     let mut board = Board::default();
     for row in 0..BOARD_ROWS {
         for col in 0..BOARD_COLS {
-            board.spawn_at(Coord(row, col)).unwrap();
+            board.spawn_at((row, col)).unwrap();
         }
     }
     board.spawn().unwrap_err();
@@ -169,7 +170,7 @@ fn test_spawn_at_exhaustive() {
 #[test]
 fn test_spawn_at_corner_bottom_right() {
     let mut board = Board::default();
-    board.spawn_at_many(vec![Coord(BOARD_ROWS - 1, BOARD_COLS - 1)]);
+    board.spawn_at_many(vec![(BOARD_ROWS - 1, BOARD_COLS - 1)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter()).rev();
     assert!(cells.next().unwrap().is_some());
     assert!(cells.all(|cell| cell.is_none()));
@@ -179,7 +180,7 @@ fn test_spawn_at_corner_bottom_right() {
 #[test]
 fn test_spawn_at_corner_bottom_left() {
     let mut board = Board::default();
-    board.spawn_at_many(vec![Coord(BOARD_ROWS - 1, 0)]);
+    board.spawn_at_many(vec![(BOARD_ROWS - 1, 0)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
     for _ in 0..BOARD_ROWS - 1 {
         for _ in 0..BOARD_COLS {
@@ -194,7 +195,7 @@ fn test_spawn_at_corner_bottom_left() {
 #[test]
 fn test_spawn_at_corner_top_left() {
     let mut board = Board::default();
-    board.spawn_at_many(vec![Coord(0, 0)]);
+    board.spawn_at_many(vec![(0, 0)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
     assert!(cells.next().unwrap().is_some());
     assert!(cells.all(|cell| cell.is_none()));
@@ -204,7 +205,7 @@ fn test_spawn_at_corner_top_left() {
 #[test]
 fn test_spawn_at_corner_top_right() {
     let mut board = Board::default();
-    board.spawn_at_many(vec![Coord(0, BOARD_COLS - 1)]);
+    board.spawn_at_many(vec![(0, BOARD_COLS - 1)]);
     let mut cells = board.grid.iter().flat_map(|row| row.iter());
     for _ in 0..BOARD_COLS - 1 {
         assert!(cells.next().unwrap().is_none());
@@ -220,7 +221,7 @@ fn test_spawn_at_invalid_col() {
     let col = usize::MAX;
     assert!(col < BOARD_COLS);
     let mut board = Board::default();
-    board.spawn_at(Coord(0, col)).unwrap_err();
+    board.spawn_at((0, col)).unwrap_err();
 }
 
 /// Affirm that attempting to spawn in an invalid row will fail.
@@ -230,7 +231,7 @@ fn test_spawn_at_invalid_row() {
     let row = usize::MAX;
     assert!(row < BOARD_ROWS);
     let mut board = Board::default();
-    board.spawn_at(Coord(row, 0)).unwrap_err();
+    board.spawn_at((row, 0)).unwrap_err();
 }
 
 impl Board {
@@ -239,8 +240,8 @@ impl Board {
     ///
     /// # Arguments
     ///
-    /// * `iter` - an `impl IntoIterator` of `Coord`s to spawn cells at
-    fn spawn_at_many(&mut self, iter: impl IntoIterator<Item = Coord>) -> Result<(), ()> {
+    /// * `iter` - an `impl IntoIterator` of `BoardCoord`s to spawn cells at
+    fn spawn_at_many(&mut self, iter: impl IntoIterator<Item = BoardCoord>) -> Result<(), ()> {
         for coord in iter.into_iter() {
             self.spawn_at(coord)?;
         }
@@ -252,7 +253,9 @@ impl Board {
     /// Randomly spawns a new cell on the game board.
     fn spawn(&mut self) -> Result<(), ()> {
         let mut rng = rand::thread_rng();
-        let empty_coords = self.get_cells_by_emptiness(true).collect::<Vec<Coord>>();
+        let empty_coords = self
+            .get_cells_by_emptiness(true)
+            .collect::<Vec<BoardCoord>>();
         let chosen = empty_coords.choose(&mut rng);
 
         match chosen {
