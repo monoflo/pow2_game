@@ -7,14 +7,19 @@ const BOARD_COLS: usize = 4;
 /// Defines the number or rows in the board.
 const BOARD_ROWS: usize = 4;
 
+/// Type representing the grid of cells on the board.
+type BoardGrid = [[Option<Cell>; BOARD_COLS]; BOARD_ROWS];
+
 /// Type representing a `BoardGrid` position (i.e. row, column indices).
 type BoardCoord = (usize, usize);
+/// Type representing either a row or column of cells from a `BoardGrid`.
+type BoardGroup = Vec<Option<Cell>>;
 
 /// The representation of a game board.
 #[derive(Default)]
 pub struct Board {
     /// The grid containing the cells of the board.
-    grid: [[Option<Cell>; BOARD_COLS]; BOARD_ROWS],
+    grid: BoardGrid,
 }
 
 /// Affirm that the default board is instantiated with `None` in each cell.
@@ -309,7 +314,7 @@ impl Board {
     ///
     /// # Arguments
     /// * `vec` - the vector of cells to shift
-    fn shift(vec: &mut Vec<Option<Cell>>) -> Result<(), ()> {
+    fn shift(vec: &mut BoardGroup) -> Result<(), ()> {
         /*
          * some test code:
         for idx in (vec.len() - 1)..1 {
@@ -337,7 +342,7 @@ impl Board {
 /// Affirm that `Board::shift` will fail on a collection of empty cells.
 #[test]
 fn test_shift_0_0_0_0() {
-    let mut row: Vec<Option<Cell>> = vec![None, None, None, None];
+    let mut row: BoardGroup = vec![None, None, None, None];
     Board::shift(&mut row).unwrap_err();
 }
 
@@ -345,7 +350,7 @@ fn test_shift_0_0_0_0() {
 /// collection did not shift.
 #[test]
 fn test_shift_0_0_0_2() {
-    let mut row: Vec<Option<Cell>> = vec![None, None, None, Some(Cell::new(2))];
+    let mut row: BoardGroup = vec![None, None, None, Some(Cell::new(2))];
     Board::shift(&mut row).unwrap_err();
 }
 
@@ -353,7 +358,7 @@ fn test_shift_0_0_0_2() {
 /// collection.
 #[test]
 fn test_shift_2_0_0_0() {
-    let mut row: Vec<Option<Cell>> = vec![Some(Cell::new(2)), None, None, None];
+    let mut row: BoardGroup = vec![Some(Cell::new(2)), None, None, None];
     Board::shift(&mut row).unwrap();
     assert_eq!(vec![None, None, None, Some(Cell::new(2))], row);
 }
@@ -361,7 +366,7 @@ fn test_shift_2_0_0_0() {
 /// Affirm that `Board::shift` will successfully merge two cells at the end of the collection.
 #[test]
 fn test_shift_0_0_2_2() {
-    let mut row: Vec<Option<Cell>> = vec![None, None, Some(Cell::new(2)), Some(Cell::new(2))];
+    let mut row: BoardGroup = vec![None, None, Some(Cell::new(2)), Some(Cell::new(2))];
     Board::shift(&mut row).unwrap();
     assert_eq!(vec![None, None, None, Some(Cell::new(4))], row);
 }
@@ -370,7 +375,7 @@ fn test_shift_0_0_2_2() {
 /// value, as a shift cannot be performed.
 #[test]
 fn test_shift_2_4_8_16() {
-    let mut row: Vec<Option<Cell>> = vec![
+    let mut row: BoardGroup = vec![
         Some(Cell::new(2)),
         Some(Cell::new(4)),
         Some(Cell::new(8)),
@@ -383,7 +388,7 @@ fn test_shift_2_4_8_16() {
 /// cells with like values, as no merging or shifting can be performed.
 #[test]
 fn test_shift_2_4_2_4() {
-    let mut row: Vec<Option<Cell>> = vec![
+    let mut row: BoardGroup = vec![
         Some(Cell::new(2)),
         Some(Cell::new(4)),
         Some(Cell::new(2)),
