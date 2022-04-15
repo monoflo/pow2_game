@@ -6,6 +6,8 @@ use crate::{Cell, Direction, Move};
 const BOARD_COLS: usize = 4;
 /// Defines the number or rows in the board.
 const BOARD_ROWS: usize = 4;
+/// Defines the maximum number of undos the player can perform.
+const HISTORY_SIZE: usize = 1;
 
 /// Type representing the grid of cells on the board.
 type BoardGrid = [[Option<Cell>; BOARD_COLS]; BOARD_ROWS];
@@ -16,20 +18,41 @@ type BoardCoord = (usize, usize);
 type BoardGroup = Vec<Option<Cell>>;
 
 /// The representation of a game board.
-#[derive(Default)]
 pub struct Board {
     /// The grid containing the cells of the board.
     grid: BoardGrid,
+    /// The saved, past states of the board that can be .
+    history: Vec<BoardGrid>,
+}
+
+/// Implementation of the `Default` trait for `Board`.
+impl Default for Board {
+    /// Create an empty grid and an empty, bound-vector of grid states.
+    fn default() -> Self {
+        Self {
+            grid: Default::default(),
+            history: Vec::with_capacity(HISTORY_SIZE),
+        }
+    }
 }
 
 /// Affirm that the default board is instantiated with `None` in each cell.
 #[test]
-fn test_default() {
+fn test_default_grid() {
     assert!(Board::default()
         .grid
         .iter()
         .flatten()
         .all(|cell| cell.is_none()));
+}
+
+/// Affirm that the default board is instantiated with empty history, containing the maximum
+/// capacity specified by `HISTORY_SIZE`.
+#[test]
+fn test_default_history() {
+    let board = Board::default();
+    assert_eq!(HISTORY_SIZE, board.history.capacity());
+    assert!(board.history.is_empty());
 }
 
 /// Implementation of the `Display` trait for `Board`.
