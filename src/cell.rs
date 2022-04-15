@@ -49,6 +49,64 @@ fn test_default() {
 }
 
 impl Cell {
+    /// Allows the instantiation of a cell with a specified value given that value is a power of
+    /// two greater than one.
+    ///
+    /// # Arguments
+    ///
+    /// * `value` - the power of two value to initialize the new cell to
+    pub fn new(value: usize) -> Self {
+        if value.count_ones() != 1 || value < 2 {
+            panic!();
+        }
+        Self(value)
+    }
+}
+
+/// Affirm that `Cell::new()` will fail to initialize a cell with a value of zero.
+#[test]
+#[should_panic]
+fn test_new_0() {
+    Cell::new(0);
+}
+
+/// Affirm that `Cell::new()` will fail to initialize a cell with a value of one.
+#[test]
+#[should_panic]
+fn test_new_1() {
+    Cell::new(1);
+}
+
+/// Affirm that `Cell::new()` will succeed for the default initalization values (two and four).
+#[test]
+fn test_new_defaults() {
+    Cell::new(2);
+    Cell::new(4);
+}
+
+/// Affirm that `Cell::new()` will fail to initialize a cell with a value of three.
+#[test]
+#[should_panic]
+fn test_new_3() {
+    Cell::new(3);
+}
+
+/// Affirm that `Cell::new()` will succeed for the largest possible power of two that can be
+/// represented by the size.
+#[test]
+fn test_new_msb() {
+    const V: usize = 1 << (usize::BITS - 1);
+    Cell::new(V);
+}
+
+/// Affirm that `Cell::new()` will fail to initialize a cell with a value of `usize::MAX`.
+#[test]
+#[should_panic]
+fn test_new_max() {
+    Cell::new(usize::MAX);
+}
+
+impl Cell {
     /// Increases the value of the cell by a power of two.
     fn grow(&mut self) -> Result<(), ()> {
         const MSB_SET: usize = 1 << (usize::BITS - 1);
