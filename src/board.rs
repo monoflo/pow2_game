@@ -301,186 +301,93 @@ fn test_new() {
     }
 }
 
-/*
 impl Board {
-    /// Shifts the provided row in the direction specified.
+    /// Attempts to shift each cell over to the end of the vector.
     ///
     /// # Arguments
-    ///
-    /// * `row` - a slice of the row of cells to shift
-    /// * `dir` - the direction in which to shift
-    fn shift_row(row: &[Cell], dir: &Move) -> Result<(), ()> {
-        assert!(*dir == Move::ShiftLeft || *dir == Move::ShiftRight);
-
-        // test whether all cells are empty
-        if row.iter().all(|cell| cell.is_empty()) {
-            // TODO: have a status code to say the row was all empty
-            return Ok(());
+    /// * `vec` - the vector of cells to shift
+    fn shift(vec: &mut Vec<Option<Cell>>) -> Result<(), ()> {
+        /*
+         * some test code:
+        for idx in (vec.len() - 1)..1 {
+            if let Some(mut cell) = &vec[idx] {
+                if let Some(mut other) = &vec[idx-1] {
+                    cell.merge(other);
+                }
+            }
         }
 
-        for idx in 0..row.len() {
-            todo!();
+        let mut iter = cells.iter().rev();
+        for (idx, cell) in iter.enumerate() {
+            if let Some(mut c) = cell {
+                if let Some(mut n) = cells.get_mut(idx+1) {
+                    if n.is_none() {
+                    }
+                }
+            }
         }
-
+        */
         Ok(())
     }
 }
 
+/// Affirm that `Board::shift` will fail on a collection of empty cells.
 #[test]
-fn test_shift_row_empty() {
-    // TODO: change `EXPECTED` to status code saying row was empty
-    let EXPECTED: Result<(), ()> = Ok(());
-    let mut row = [Cell::new(); BOARD_COLS];
-    assert_eq!(EXPECTED, Board::shift_row(&row, &Move::ShiftRight));
-    assert!(row.iter().all(|cell| cell.is_empty()));
+fn test_shift_0_0_0_0() {
+    let mut row: Vec<Option<Cell>> = vec![None, None, None, None];
+    Board::shift(&mut row).unwrap_err();
 }
 
+/// Affirm that `Board::shift` will fail on a collection where only one cell is at the end, as the
+/// collection did not shift.
 #[test]
-fn test_shift_row_right_cell_at_start() {
-    //const R: usize = 0;
-    const C: usize = 0;
-
-    //let mut board = Board::new();
-    let mut row = [Cell::new(); BOARD_COLS];
-
-    // spawn cell in the first column
-    //board.spawn_at(Coord(R, C)).unwrap();
-    row[C].spawn().unwrap();
-
-    // shift cell right over to the last column
-    //Board::shift_row(&board.grid[R], &Move::ShiftRight);
-    Board::shift_row(&row, &Move::ShiftRight).unwrap();
-
-    //let mut iter = (0..BOARD_COLS).map(|col| board.grid[R][col]).rev();
-    let mut iter = row.into_iter().rev();
-
-    assert!(!iter.next().unwrap().is_empty());
-    assert!(iter.all(|cell| cell.is_empty()));
+fn test_shift_0_0_0_2() {
+    let mut row: Vec<Option<Cell>> = vec![None, None, None, Some(Cell::new(2))];
+    Board::shift(&mut row).unwrap_err();
 }
 
+/// Affirm that `Board::shift` will successfully push one cell from the start to the end of the
+/// collection.
 #[test]
-fn test_shift_row_left_cell_at_end() {
-    // const R: usize = 0;
-    const C: usize = BOARD_COLS - 1;
-
-    // let mut board = Board::new();
-    let mut row = [Cell::new(); BOARD_COLS];
-
-    // spawn cell in the first column
-    // board.spawn_at(Coord(R, C)).unwrap();
-    row[C].spawn().unwrap();
-
-    // shift cell left over to the first column
-    // Board::shift_row(&board.grid[R], &Move::ShiftLeft);
-    Board::shift_row(&row, &Move::ShiftLeft).unwrap();
-
-    //let mut iter = (0..BOARD_COLS).map(|col| board.grid[R][col]);
-    let mut iter = row.into_iter();
-
-    assert!(!iter.next().unwrap().is_empty());
-    assert!(iter.all(|cell| cell.is_empty()));
+fn test_shift_2_0_0_0() {
+    let mut row: Vec<Option<Cell>> = vec![Some(Cell::new(2)), None, None, None];
+    Board::shift(&mut row).unwrap();
+    assert_eq!(vec![None, None, None, Some(Cell::new(2))], row);
 }
 
+/// Affirm that `Board::shift` will successfully merge two cells at the end of the collection.
 #[test]
-fn test_shift_row_left_merge_ends() {
-    const D: Move = Move::ShiftRight;
-    const V: usize = 2;
-    const C0: usize = 0;
-    const C1: usize = BOARD_COLS - 1;
-
-    let mut row = [Cell::new(); BOARD_COLS];
-    row[C0].spawn_value(V).unwrap();
-    row[C1].spawn_value(V).unwrap();
-
-    Board::shift_row(&row, &D).unwrap();
-
-    let mut iter = row.into_iter();
-
-    assert_eq!(V * 2, iter.next().unwrap().value());
-    assert!(iter.all(|cell| cell.is_empty()));
+fn test_shift_0_0_2_2() {
+    let mut row: Vec<Option<Cell>> = vec![None, None, Some(Cell::new(2)), Some(Cell::new(2))];
+    Board::shift(&mut row).unwrap();
+    assert_eq!(vec![None, None, None, Some(Cell::new(4))], row);
 }
 
+/// Affirm that `Board::shift` will fail on a collection where none of the cells are equal in
+/// value, as a shift cannot be performed.
 #[test]
-fn test_shift_row_right_merge_ends() {
-    const D: Move = Move::ShiftRight;
-    const V: usize = 2;
-    const C0: usize = 0;
-    const C1: usize = BOARD_COLS - 1;
-
-    let mut row = [Cell::new(); BOARD_COLS];
-    row[C0].spawn_value(V).unwrap();
-    row[C1].spawn_value(V).unwrap();
-
-    Board::shift_row(&row, &D).unwrap();
-
-    let mut iter = row.into_iter().rev();
-
-    assert_eq!(V * 2, iter.next().unwrap().value());
-    assert!(iter.all(|cell| cell.is_empty()));
+fn test_shift_2_4_8_16() {
+    let mut row: Vec<Option<Cell>> = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+        Some(Cell::new(8)),
+        Some(Cell::new(16)),
+    ];
+    Board::shift(&mut row).unwrap_err();
 }
 
-impl Board {
-    /// Shifts the game board horizontally in the direction specified.
-    ///
-    /// # Arguments
-    ///
-    /// * `dir` - the direction in which to shift
-    fn shift_horizontal(&mut self, dir: Move) -> Result<(), ()> {
-        assert!(dir == Move::ShiftLeft || dir == Move::ShiftRight);
-
-        // clone the board
-        // TODO: have `Board::movement` do this, get clone as arg?
-        let mut sgrid = self.grid;
-
-        // shift each row in the specified direction
-        for row in sgrid.iter() {
-            Board::shift_row(row, &dir)?;
-        }
-
-        // replace board with shifted copy
-        self.grid = sgrid;
-        Ok(())
-    }
+/// Affirm that `Board::shift` will fail on a collection where none of the cells are adjacent to
+/// cells with like values, as no merging or shifting can be performed.
+#[test]
+fn test_shift_2_4_2_4() {
+    let mut row: Vec<Option<Cell>> = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+    ];
+    Board::shift(&mut row).unwrap_err();
 }
-
-impl Board {
-    /// Shifts the provided row in the direction specified.
-    ///
-    /// # Arguments
-    ///
-    /// * `col` - a slice of the row of cells to shift
-    /// * `dir` - the direction in which to shift
-    fn shift_column(col: &[Cell], dir: &Move) -> Result<(), ()> {
-        assert!(*dir == Move::ShiftUp || *dir == Move::ShiftDown);
-        // todo!();
-        Ok(())
-    }
-}
-
-impl Board {
-    /// Shifts the game board vertically in the direction specified.
-    ///
-    /// # Arguments
-    ///
-    /// * `dir` - the direction in which to shift
-    fn shift_vertical(&mut self, dir: Move) -> Result<(), ()> {
-        assert!(dir == Move::ShiftUp || dir == Move::ShiftDown);
-
-        // clone the board
-        // TODO: have `Board::movement` do this, get clone as arg?
-        let mut sgrid = self.grid;
-
-        // shift each column in the specified direction
-        for idx in 0..BOARD_COLS {
-            todo!("vertical shifts have not been implemented");
-        }
-
-        // replace board with shifted copy
-        self.grid = sgrid;
-        Ok(())
-    }
-}
-*/
 
 impl Board {
     /// Handles movement on the game board.
