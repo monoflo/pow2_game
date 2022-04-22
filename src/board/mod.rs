@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use rand::seq::SliceRandom;
 
 use crate::{Cell, Direction, Move};
@@ -24,8 +26,10 @@ type BoardCoord = (usize, usize);
 pub struct Board {
     /// The grid containing the cells of the board.
     grid: BoardGrid,
-    /// The saved, past states of the board that can be .
+    /// The saved, past states of the board that can be.
     history: Vec<BoardGrid>,
+    /// The calculated boards for shifts in each direction.
+    next: HashMap<Direction, Option<BoardGrid>>,
 }
 
 /// Implementation of the `Default` trait for `Board`.
@@ -35,6 +39,7 @@ impl Default for Board {
         Self {
             grid: Default::default(),
             history: Vec::with_capacity(HISTORY_SIZE),
+            next: HashMap::new(),
         }
     }
 }
