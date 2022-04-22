@@ -1,7 +1,7 @@
 use rand::Rng;
 
 /// The representation of a cell on the game board.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Cell(usize);
 
 impl Cell {
@@ -199,14 +199,15 @@ impl Cell {
     /// # Notes
     ///
     /// * `other` should be assigned to the result of the function call
-    pub fn merge(&mut self, other: Self) -> Option<Cell> {
-        if *self == other {
-            self.grow().unwrap();
-            drop(other);
-            return None;
+    pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
+        match *self == *other {
+            true => {
+                self.grow().unwrap();
+                drop(other);
+                Ok(())
+            }
+            _ => Err(()),
         }
-
-        Some(other)
     }
 }
 
@@ -215,10 +216,10 @@ impl Cell {
 #[test]
 fn test_merge_with_equal() {
     const V: usize = 2;
-    let mut mergee = Cell(V);
-    let merger = mergee.merge(Cell(V));
 
-    assert_eq!(None, merger);
+    let (mut mergee, mut merger) = (Cell(V), Cell(V));
+    mergee.merge(&mut merger).unwrap();
+
     assert_eq!(V * 2, mergee.0);
 }
 
@@ -228,8 +229,11 @@ fn test_merge_with_equal() {
 fn test_merge_with_unequal() {
     const A: usize = 2;
     const B: usize = 4;
-    let mut mergee = Cell(A);
-    let mut merger = mergee.merge(Cell(B)).unwrap();
+
+    assert_ne!(A, B);
+
+    let (mut mergee, mut merger) = (Cell(A), Cell(B));
+    mergee.merge(&mut merger).unwrap_err();
 
     assert_eq!(A, mergee.0);
     assert_eq!(B, merger.0);

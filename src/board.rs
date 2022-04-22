@@ -16,8 +16,6 @@ type BoardGrid = [[BoardCell; BOARD_COLS]; BOARD_ROWS];
 
 /// Type representing a `BoardGrid` position (i.e. row, column indices).
 type BoardCoord = (usize, usize);
-/// Type representing either a row or column of cells from a `BoardGrid`.
-type BoardGroup = Vec<BoardCell>;
 
 /// The representation of a game board.
 pub struct Board {
@@ -335,91 +333,257 @@ fn test_new() {
 }
 
 impl Board {
-    /// Attempts to shift each cell over to the end of the vector.
-    ///
-    /// # Arguments
-    /// * `vec` - the vector of cells to shift
-    fn shift(vec: &mut BoardGroup) -> Result<(), ()> {
-        /*
-         * some test code:
-        for idx in (vec.len() - 1)..1 {
-            if let Some(mut cell) = &vec[idx] {
-                if let Some(mut other) = &vec[idx-1] {
-                    cell.merge(other);
-                }
-            }
+    fn get_mergeable<'a>(cells: impl IntoIterator<Item = &'a BoardCell>) -> Vec<(usize, usize)> {
+        struct RefCell {
+            index: Option<usize>,
+            value: Option<usize>,
         }
 
-        let mut iter = cells.iter().rev();
-        for (idx, cell) in iter.enumerate() {
-            if let Some(mut c) = cell {
-                if let Some(mut n) = cells.get_mut(idx+1) {
-                    if n.is_none() {
-                    }
+        let mut result: Vec<(usize, usize)> = Vec::new();
+        let mut rc = RefCell {
+            index: None,
+            value: None,
+        };
+
+        let mut iter = cells.into_iter().enumerate();
+
+        for (idx, cell_opt) in iter {
+            if let Some(cc) = cell_opt {
+                let val = cc.value();
+
+                if rc.index.is_some() && rc.value.is_some() && val == rc.value.unwrap() {
+                    result.push((rc.index.unwrap(), idx));
+                    rc.index = None;
+                    rc.value = None;
+                } else {
+                    rc.index = Some(idx);
+                    rc.value = Some(val);
                 }
             }
         }
-        */
-        Ok(())
+        result
     }
 }
 
-/// Affirm that `Board::shift` will fail on a collection of empty cells.
+/// Affirm that `Board::get_mergeable` reports no mergeable pairs for an empty collection.
 #[test]
-fn test_shift_0_0_0_0() {
-    let mut row: BoardGroup = vec![None, None, None, None];
-    Board::shift(&mut row).unwrap_err();
+fn test_get_mergeable_0_0_0_0() {
+    let cells = vec![None, None, None, None];
+    assert!(Board::get_mergeable(&cells).is_empty());
 }
 
-/// Affirm that `Board::shift` will fail on a collection where only one cell is at the end, as the
-/// collection did not shift.
+/// Affirm that `Board::get_mergeable` reports no mergeable pairs for a singular non-empty cell.
 #[test]
-fn test_shift_0_0_0_2() {
-    let mut row: BoardGroup = vec![None, None, None, Some(Cell::new(2))];
-    Board::shift(&mut row).unwrap_err();
+fn test_get_mergeable_0_0_0_2() {
+    let cells = vec![None, None, None, Some(Cell::new(2))];
+    assert!(Board::get_mergeable(&cells).is_empty());
 }
 
-/// Affirm that `Board::shift` will successfully push one cell from the start to the end of the
-/// collection.
+/// Affirm that `Board::get_mergeable` reports one mergeable pair for a contiguous pair of
+/// same-valued cells.
 #[test]
-fn test_shift_2_0_0_0() {
-    let mut row: BoardGroup = vec![Some(Cell::new(2)), None, None, None];
-    Board::shift(&mut row).unwrap();
-    assert_eq!(vec![None, None, None, Some(Cell::new(2))], row);
+fn test_get_mergeable_0_0_2_2() {
+    let expect = vec![(2, 3)];
+    let cells = vec![None, None, Some(Cell::new(2)), Some(Cell::new(2))];
+    assert_eq!(expect, Board::get_mergeable(&cells));
 }
 
-/// Affirm that `Board::shift` will successfully merge two cells at the end of the collection.
+/// Affirm that `Board::get_mergeable` reports one mergeable pair for a pair of same-valued cells
+/// separated by an empty cell.
 #[test]
-fn test_shift_0_0_2_2() {
-    let mut row: BoardGroup = vec![None, None, Some(Cell::new(2)), Some(Cell::new(2))];
-    Board::shift(&mut row).unwrap();
-    assert_eq!(vec![None, None, None, Some(Cell::new(4))], row);
+fn test_get_mergeable_0_2_0_2() {
+    let expect = vec![(1, 3)];
+    let cells = vec![None, Some(Cell::new(2)), None, Some(Cell::new(2))];
+    assert_eq!(expect, Board::get_mergeable(&cells));
 }
 
-/// Affirm that `Board::shift` will fail on a collection where none of the cells are equal in
-/// value, as a shift cannot be performed.
+/// Affirm that `Board::get_mergeable` reports no mergeable pairs for a pair of same-valued cells
+/// separated by a cell of dissimilar value to the others.
 #[test]
-fn test_shift_2_4_8_16() {
-    let mut row: BoardGroup = vec![
+fn test_get_mergeable_0_2_4_2() {
+    let cells = vec![
+        None,
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+        Some(Cell::new(2)),
+    ];
+    assert!(Board::get_mergeable(&cells).is_empty());
+}
+
+#[test]
+fn test_get_mergeable_2_2_2_2() {
+    let expect = vec![(0, 1), (2, 3)];
+    let cells = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+    ];
+    assert_eq!(expect, Board::get_mergeable(&cells));
+}
+
+#[test]
+fn test_get_mergeable_2_4_4_2() {
+    let expect = vec![(1, 2)];
+    let cells = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+        Some(Cell::new(4)),
+        Some(Cell::new(2)),
+    ];
+    assert_eq!(expect, Board::get_mergeable(&cells));
+}
+
+impl Board {
+    /// Attempts to shift each cell over to the beginning of the vector.
+    ///
+    /// # Arguments
+    /// * `cells` - a group of `BoardCell`s that can be
+    ///
+    /// # Returns
+    /// * `None` - neither a shift or merge was able to be performed on the group
+    /// * `Some(Vec<BoardCell>)` - otherwise
+    fn shift_group(cells: impl IntoIterator<Item = BoardCell>) -> Option<Vec<BoardCell>> {
+        let mut result = cells.into_iter().collect::<Vec<BoardCell>>();
+        let mergeable = Board::get_mergeable(result.iter());
+        let mut valid = !mergeable.is_empty();
+
+        /* merge pairs */
+
+        // foo bar baz
+
+        for pair in mergeable {
+            let (ls, rs) = result.split_at_mut(pair.1);
+            let mergee = ls[pair.0].as_mut().unwrap();
+            let merger = rs[0].as_mut().unwrap();
+
+            mergee.merge(merger).unwrap();
+            rs[0] = None; // after merge, `merger` is dropped, so set to `None`
+        }
+
+        /* shift cells */
+
+        let mut swpidx: Option<usize> = None;
+
+        for idx in 0..result.len() {
+            match (swpidx.is_some(), result[idx].is_some()) {
+                // if `swpidx` isn't set and value is `None`, set the `swpidx`
+                (false, false) => {
+                    swpidx = Some(idx);
+                }
+                // if `swpidx` is set and value is `Some(...)`, perform swap
+                (true, true) => {
+                    result.swap(swpidx.unwrap(), idx);
+                    swpidx = None;
+                    valid = true;
+                }
+                _ => {}
+            }
+        }
+
+        valid.then(|| result)
+    }
+}
+
+/// Affirm that `Board::shift_group` will return nothing on a group of empty cells.
+#[test]
+fn test_shift_group_0_0_0_0() {
+    let mut row: Vec<BoardCell> = vec![None, None, None, None];
+    let result = Board::shift_group(row);
+    assert!(result.is_none());
+}
+
+/// Affirm that `Board::shift_group` will return nothing on a group containing one cell positioned at the
+/// start.
+#[test]
+fn test_shift_group_2_0_0_0() {
+    let row = vec![Some(Cell::new(2)), None, None, None];
+    let result = Board::shift_group(row);
+    assert!(result.is_none());
+}
+
+/// Affirm that `Board::shift_group` will successfully shift a group containing one cell positioned at
+/// the end to the start.
+#[test]
+fn test_shift_group_0_0_0_2() {
+    let mut row = vec![None, None, None, Some(Cell::new(2))];
+    let result = Board::shift_group(row).unwrap();
+    let mut iter = result.iter();
+    assert_eq!(Some(Cell::new(2)), *iter.next().unwrap());
+    assert!(iter.all(|cell| cell.is_none()));
+}
+
+/// Affirm that `Board::shift_group` will successfully merge two cells at the start of the group.
+#[test]
+fn test_shift_group_2_2_0_0() {
+    let mut row = vec![Some(Cell::new(2)), Some(Cell::new(2)), None, None];
+    let result = Board::shift_group(row).unwrap();
+    let mut iter = result.iter();
+    assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());
+    assert!(iter.all(|cell| cell.is_none()));
+}
+
+/// Affirm that `Board::shift_group` will return nothing on a group where none of the cells have like
+/// values, as neither a shift or merge can be performed.
+#[test]
+fn test_shift_group_2_4_8_16() {
+    let mut row = vec![
         Some(Cell::new(2)),
         Some(Cell::new(4)),
         Some(Cell::new(8)),
         Some(Cell::new(16)),
     ];
-    Board::shift(&mut row).unwrap_err();
+    let result = Board::shift_group(row);
+    assert!(result.is_none());
 }
 
-/// Affirm that `Board::shift` will fail on a collection where none of the cells are adjacent to
+/// Affirm that `Board::shift_group` will return nothing on a group where none of the cells are adjacent to
 /// cells with like values, as no merging or shifting can be performed.
 #[test]
-fn test_shift_2_4_2_4() {
-    let mut row: BoardGroup = vec![
+fn test_shift_group_2_4_2_4() {
+    let mut row = vec![
         Some(Cell::new(2)),
         Some(Cell::new(4)),
         Some(Cell::new(2)),
         Some(Cell::new(4)),
     ];
-    Board::shift(&mut row).unwrap_err();
+    let result = Board::shift_group(row);
+    assert!(result.is_none());
+}
+
+/// Affirm that `Board::shift_group` will succeed on a group with two like values separated by a pair of
+/// like values. Only one merge should be performed, and the group will shift.
+#[test]
+fn test_shift_group_2_4_4_2() {
+    let mut row = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(4)),
+        Some(Cell::new(4)),
+        Some(Cell::new(2)),
+    ];
+    let result = Board::shift_group(row).unwrap();
+    let mut iter = result.iter();
+    assert_eq!(Some(Cell::new(2)), *iter.next().unwrap());
+    assert_eq!(Some(Cell::new(8)), *iter.next().unwrap());
+    assert_eq!(Some(Cell::new(2)), *iter.next().unwrap());
+    assert!(iter.all(|cell| cell.is_none()));
+}
+
+/// Affirm that `Board::shift_group` will succeed on a group with all like values. Only two merges should
+/// be performed, and the group will shift.
+#[test]
+fn test_shift_group_2_2_2_2() {
+    let mut row = vec![
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+        Some(Cell::new(2)),
+    ];
+    let result = Board::shift_group(row).unwrap();
+    let mut iter = result.iter();
+    assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());
+    assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());
+    assert!(iter.all(|cell| cell.is_none()));
 }
 
 impl Board {
