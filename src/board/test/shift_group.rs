@@ -4,7 +4,7 @@ use super::*;
 #[test]
 fn input_0_0_0_0() {
     let mut row: Vec<BoardCell> = vec![None, None, None, None];
-    let result = Board::shift_group(row);
+    let result = Board::shift_group(row, Direction::Left);
     assert!(result.is_none());
 }
 
@@ -13,7 +13,7 @@ fn input_0_0_0_0() {
 #[test]
 fn input_2_0_0_0() {
     let row = vec![Some(Cell::new(2)), None, None, None];
-    let result = Board::shift_group(row);
+    let result = Board::shift_group(row, Direction::Left);
     assert!(result.is_none());
 }
 
@@ -22,7 +22,7 @@ fn input_2_0_0_0() {
 #[test]
 fn input_0_0_0_2() {
     let mut row = vec![None, None, None, Some(Cell::new(2))];
-    let result = Board::shift_group(row).unwrap();
+    let result = Board::shift_group(row, Direction::Left).unwrap();
     let mut iter = result.iter();
     assert_eq!(Some(Cell::new(2)), *iter.next().unwrap());
     assert!(iter.all(|cell| cell.is_none()));
@@ -32,7 +32,7 @@ fn input_0_0_0_2() {
 #[test]
 fn input_2_2_0_0() {
     let mut row = vec![Some(Cell::new(2)), Some(Cell::new(2)), None, None];
-    let result = Board::shift_group(row).unwrap();
+    let result = Board::shift_group(row, Direction::Left).unwrap();
     let mut iter = result.iter();
     assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());
     assert!(iter.all(|cell| cell.is_none()));
@@ -48,7 +48,7 @@ fn input_2_4_8_16() {
         Some(Cell::new(8)),
         Some(Cell::new(16)),
     ];
-    let result = Board::shift_group(row);
+    let result = Board::shift_group(row, Direction::Left);
     assert!(result.is_none());
 }
 
@@ -62,7 +62,7 @@ fn input_2_4_2_4() {
         Some(Cell::new(2)),
         Some(Cell::new(4)),
     ];
-    let result = Board::shift_group(row);
+    let result = Board::shift_group(row, Direction::Left);
     assert!(result.is_none());
 }
 
@@ -76,7 +76,7 @@ fn input_2_4_4_2() {
         Some(Cell::new(4)),
         Some(Cell::new(2)),
     ];
-    let result = Board::shift_group(row).unwrap();
+    let result = Board::shift_group(row, Direction::Left).unwrap();
     let mut iter = result.iter();
     assert_eq!(Some(Cell::new(2)), *iter.next().unwrap());
     assert_eq!(Some(Cell::new(8)), *iter.next().unwrap());
@@ -94,7 +94,7 @@ fn input_2_2_2_2() {
         Some(Cell::new(2)),
         Some(Cell::new(2)),
     ];
-    let result = Board::shift_group(row).unwrap();
+    let result = Board::shift_group(row, Direction::Left).unwrap();
     let mut iter = result.iter();
     assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());
     assert_eq!(Some(Cell::new(4)), *iter.next().unwrap());

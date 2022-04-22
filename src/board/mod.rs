@@ -198,12 +198,16 @@ impl Board {
     /// Attempts to shift each cell over to the beginning of the vector.
     ///
     /// # Arguments
-    /// * `cells` - a group of `BoardCell`s that can be
+    /// * `cells` - the group of `BoardCell`s to be shifted
+    /// * `dir` - the direction in which to shift the group
     ///
     /// # Returns
     /// * `None` - neither a shift or merge was able to be performed on the group
     /// * `Some(Vec<BoardCell>)` - otherwise
-    fn shift_group(cells: impl IntoIterator<Item = BoardCell>) -> Option<Vec<BoardCell>> {
+    fn shift_group(
+        cells: impl IntoIterator<Item = BoardCell>,
+        dir: Direction,
+    ) -> Option<Vec<BoardCell>> {
         let mut result = cells.into_iter().collect::<Vec<BoardCell>>();
         let mergeable = Board::get_mergeable(result.iter());
         let mut valid = !mergeable.is_empty();
@@ -223,8 +227,12 @@ impl Board {
         /* shift cells */
 
         let mut swpidx: Option<usize> = None;
+        let mut iter = match dir {
+            Direction::Up | Direction::Left => 0..result.len(),
+            Direction::Down | Direction::Right => result.len()..0,
+        };
 
-        for idx in 0..result.len() {
+        for idx in iter {
             match (swpidx.is_some(), result[idx].is_some()) {
                 // if `swpidx` isn't set and value is `None`, set the `swpidx`
                 (false, false) => {
