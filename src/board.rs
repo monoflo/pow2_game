@@ -9,13 +9,15 @@ const BOARD_ROWS: usize = 4;
 /// Defines the maximum number of undos the player can perform.
 const HISTORY_SIZE: usize = 1;
 
+/// Type representing a cell on the board.
+type BoardCell = Option<Cell>;
 /// Type representing the grid of cells on the board.
-type BoardGrid = [[Option<Cell>; BOARD_COLS]; BOARD_ROWS];
+type BoardGrid = [[BoardCell; BOARD_COLS]; BOARD_ROWS];
 
 /// Type representing a `BoardGrid` position (i.e. row, column indices).
 type BoardCoord = (usize, usize);
 /// Type representing either a row or column of cells from a `BoardGrid`.
-type BoardGroup = Vec<Option<Cell>>;
+type BoardGroup = Vec<BoardCell>;
 
 /// The representation of a game board.
 pub struct Board {
