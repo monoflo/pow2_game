@@ -67,20 +67,19 @@ impl Cell {
     /// Iff the cells have equal value, then `self` will grow whereas `other` will be dropped.
     ///
     /// # Arguments
-    ///
     /// * `other` - the other cell to merge with (that will be dropped on merge)
     ///
-    /// # Notes
-    ///
-    /// * `other` should be assigned to the result of the function call
-    pub fn merge(&mut self, other: &mut Self) -> Result<(), ()> {
-        match *self == *other {
+    /// # Returns
+    /// * `Ok(())` -
+    /// * `Err(Self)` - return `other`, as it was not successfully merged
+    pub fn merge(&mut self, mut other: Self) -> Result<(), Self> {
+        match *self == other {
             true => {
                 self.grow().unwrap();
                 drop(other);
                 Ok(())
             }
-            _ => Err(()),
+            _ => Err(other),
         }
     }
 }

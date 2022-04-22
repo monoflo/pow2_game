@@ -210,15 +210,14 @@ impl Board {
 
         /* merge pairs */
 
-        // foo bar baz
-
         for pair in mergeable {
             let (ls, rs) = result.split_at_mut(pair.1);
             let mergee = ls[pair.0].as_mut().unwrap();
-            let merger = rs[0].as_mut().unwrap();
+
+            // note: `take` replaces the value with `None`
+            let merger = rs[0].take().unwrap();
 
             mergee.merge(merger).unwrap();
-            rs[0] = None; // after merge, `merger` is dropped, so set to `None`
         }
 
         /* shift cells */

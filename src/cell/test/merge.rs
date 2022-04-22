@@ -7,7 +7,7 @@ fn with_equal() {
     const V: usize = 2;
 
     let (mut mergee, mut merger) = (Cell(V), Cell(V));
-    mergee.merge(&mut merger).unwrap();
+    mergee.merge(merger).unwrap();
 
     assert_eq!(V * 2, mergee.0);
 }
@@ -22,7 +22,7 @@ fn with_unequal() {
     assert_ne!(A, B);
 
     let (mut mergee, mut merger) = (Cell(A), Cell(B));
-    mergee.merge(&mut merger).unwrap_err();
+    merger = mergee.merge(merger).unwrap_err();
 
     assert_eq!(A, mergee.0);
     assert_eq!(B, merger.0);
