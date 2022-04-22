@@ -22,17 +22,28 @@ fn parse_input(inp: &str) -> Result<Move, ()> {
 fn main() {
     let mut board = Board::new();
 
-    println!("{}", board);
-
     loop {
-        let mut input = String::new();
-        print!("move: ");
-        std::io::stdout().flush().unwrap();
-        std::io::stdin().read_line(&mut input).unwrap();
-        input.truncate(1);
-        let input = input.to_lowercase();
-        let mov: Move = parse_input(&input).expect("invalid move type");
-        board.movement(mov).unwrap();
-        println!("{}", board);
+        println!("{}\n", board);
+
+        let mut mov: Option<Move> = None;
+        while mov.is_none() {
+            print!("move: ");
+            std::io::stdout().flush().unwrap();
+
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+            input.truncate(1);
+            let input = input.to_lowercase();
+
+            match parse_input(&input) {
+                Ok(m) => mov = Some(m),
+                _ => println!("invalid input"),
+            };
+        }
+
+        if let Err(()) = board.movement(mov.unwrap()) {
+            println!("invalid move");
+        }
+        println!();
     }
 }
