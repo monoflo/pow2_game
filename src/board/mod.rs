@@ -251,15 +251,15 @@ impl Board {
         valid.then(|| result)
     }
 
-    // TODO: test `Board::board_undo`, probably rename the method to remove "board_" prefix
+    // TODO: add test suite
     /// Attempt to undo the board to the previous move state.
-    fn board_undo(&mut self) -> Result<(), ()> {
+    fn undo(&mut self) -> Result<(), ()> {
         let state = self.history.pop().ok_or(())?;
         self.grid = state;
         Ok(())
     }
 
-    fn board_shift(&mut self, dir: Direction) -> Result<(), ()> {
+    fn shift(&mut self, dir: Direction) -> Result<(), ()> {
         todo!();
     }
 
@@ -270,8 +270,8 @@ impl Board {
     /// * `mov` - the movement type to handle
     pub fn movement(&mut self, mov: Move) -> Result<(), ()> {
         match mov {
-            Move::Shift(dir) => self.board_shift(dir),
-            Move::Undo => self.board_undo(),
+            Move::Shift(dir) => self.shift(dir),
+            Move::Undo => self.undo(),
         }
     }
 }
