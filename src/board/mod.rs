@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use array2d::Array2D;
 use rand::seq::SliceRandom;
 
 use crate::{Cell, Direction, Move};
@@ -17,7 +18,7 @@ const HISTORY_SIZE: usize = 1;
 type BoardCell = Option<Cell>;
 
 /// Type representing the grid of cells on the board.
-type BoardGrid = [[BoardCell; BOARD_COLS]; BOARD_ROWS];
+type BoardGrid = Array2D<BoardCell>;
 
 /// Type representing a `BoardGrid` position (i.e. row, column indices).
 type BoardCoord = (usize, usize);
@@ -37,7 +38,7 @@ impl Default for Board {
     /// Create an empty grid and an empty, bound-vector of grid states.
     fn default() -> Self {
         Self {
-            grid: Default::default(),
+            grid: Array2D::filled_with(Some(Cell::default()), BOARD_ROWS, BOARD_COLS),
             history: Vec::with_capacity(HISTORY_SIZE),
             next: HashMap::new(),
         }
@@ -51,9 +52,8 @@ impl std::fmt::Display for Board {
             f,
             "{}",
             self.grid
-                .iter()
+                .rows_iter()
                 .map(|row| row
-                    .iter()
                     .map(|cell| match cell {
                         Some(c) => c.to_string(),
                         None => 0.to_string(),
@@ -80,7 +80,7 @@ impl Board {
     ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
-            .filter(move |row| is_empty == self.grid[*row][col].is_none())
+            .filter(move |row| is_empty == self.grid.get(*row, col).is_none())
             .map(move |row| (row, col))
     }
 
@@ -97,7 +97,7 @@ impl Board {
     ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
-            .filter(move |col| is_empty == self.grid[row][*col].is_none())
+            .filter(move |col| is_empty == self.grid.get(row, *col).is_none())
             .map(move |col| (row, col))
     }
 
@@ -119,10 +119,10 @@ impl Board {
         assert!(pos.0 < BOARD_ROWS);
         assert!(pos.1 < BOARD_COLS);
 
-        let mut gridpos = &mut self.grid[pos.0][pos.1];
+        let mut gridpos = self.grid.get(pos.0, pos.1);
 
-        if None == *gridpos {
-            *gridpos = Some(Cell::default());
+        if None == gridpos {
+            self.grid.set(pos.0, pos.1, Some(Cell::default()));
             return Ok(());
         }
 
