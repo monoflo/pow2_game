@@ -5,8 +5,7 @@ use super::*;
 fn grid() {
     assert!(Board::default()
         .grid
-        .iter()
-        .flatten()
+        .elements_row_major_iter()
         .all(|cell| cell.is_none()));
 }
 
