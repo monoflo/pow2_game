@@ -80,7 +80,7 @@ impl Board {
     ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(col < BOARD_COLS);
         (0..BOARD_ROWS)
-            .filter(move |row| is_empty == self.grid.get(*row, col).is_none())
+            .filter(move |row| is_empty == self.grid.get(*row, col).unwrap().is_none())
             .map(move |row| (row, col))
     }
 
@@ -97,7 +97,7 @@ impl Board {
     ) -> impl Iterator<Item = BoardCoord> + '_ {
         assert!(row < BOARD_ROWS);
         (0..BOARD_COLS)
-            .filter(move |col| is_empty == self.grid.get(row, *col).is_none())
+            .filter(move |col| is_empty == self.grid.get(row, *col).unwrap().is_none())
             .map(move |col| (row, col))
     }
 
@@ -119,14 +119,16 @@ impl Board {
         assert!(pos.0 < BOARD_ROWS);
         assert!(pos.1 < BOARD_COLS);
 
-        let mut gridpos = self.grid.get(pos.0, pos.1);
+        let mut gridpos = self.grid.get(pos.0, pos.1).unwrap();
 
-        if None == gridpos {
-            self.grid.set(pos.0, pos.1, Some(Cell::default()));
-            return Ok(());
+        match gridpos
+        {
+            Some(x) => Err(()),
+            None => {
+                self.grid.set(pos.0, pos.1, Some(Cell::default()));
+                Ok(())
+            }
         }
-
-        Err(())
     }
 
     #[allow(dead_code)]
