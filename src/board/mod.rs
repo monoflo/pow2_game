@@ -87,13 +87,11 @@ impl Board {
         assert!(pos.0 < BOARD_ROWS);
         assert!(pos.1 < BOARD_COLS);
 
-        let mut gridpos = self.grid.get(pos.0, pos.1).unwrap();
-
-        match gridpos
+        match self.grid.get(pos.0, pos.1).unwrap()
         {
-            Some(x) => Err(()),
+            Some(_) => Err(()),
             None => {
-                self.grid.set(pos.0, pos.1, Some(Cell::default()));
+                self.grid.set(pos.0, pos.1, Some(Cell::default())).unwrap();
                 Ok(())
             }
         }
@@ -146,9 +144,7 @@ impl Board {
             value: None,
         };
 
-        let mut iter = cells.into_iter().enumerate();
-
-        for (idx, cell_opt) in iter {
+        for (idx, cell_opt) in cells.into_iter().enumerate() {
             if let Some(cc) = cell_opt {
                 let val = cc.value();
 
@@ -197,7 +193,7 @@ impl Board {
         /* shift cells */
 
         let mut swpidx: Option<usize> = None;
-        let mut iter = match dir {
+        let iter = match dir {
             Direction::Up | Direction::Left => 0..result.len(),
             Direction::Down | Direction::Right => result.len()..0,
         };

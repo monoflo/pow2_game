@@ -72,7 +72,7 @@ impl Cell {
     /// # Returns
     /// * `Ok(())` -
     /// * `Err(Self)` - return `other`, as it was not successfully merged
-    pub fn merge(&mut self, mut other: Self) -> Result<(), Self> {
+    pub fn merge(&mut self, other: Self) -> Result<(), Self> {
         match *self == other {
             true => {
                 self.grow().unwrap();
