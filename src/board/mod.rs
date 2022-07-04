@@ -38,7 +38,7 @@ impl Default for Board {
     /// Create an empty grid and an empty, bound-vector of grid states.
     fn default() -> Self {
         Self {
-            grid: Array2D::filled_with(Some(Cell::default()), BOARD_ROWS, BOARD_COLS),
+            grid: Array2D::filled_with(None, BOARD_ROWS, BOARD_COLS),
             history: Vec::with_capacity(HISTORY_SIZE),
             next: HashMap::new(),
         }
