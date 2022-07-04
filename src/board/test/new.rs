@@ -8,7 +8,7 @@ fn test_new() {
     let mut found = false;
     for row in 0..BOARD_ROWS {
         for col in 0..BOARD_COLS {
-            let is_empty = board.grid.get(row, col).is_none();
+            let is_empty = board.grid.get(row, col).unwrap().is_none();
             assert!(is_empty || !found);
             found = found || !is_empty;
         }
