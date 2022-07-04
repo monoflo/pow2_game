@@ -67,47 +67,15 @@ impl std::fmt::Display for Board {
 }
 
 impl Board {
-    /// Retrieves cells in the given col matching the specified emptiness.
-    ///
-    /// # Arguments
-    ///
-    /// * `is_empty` - whether the cell should be empty; search criteria
-    /// * `col` - the board col in which to search
-    fn get_cells_by_emptiness_col(
-        &self,
-        is_empty: bool,
-        col: usize,
-    ) -> impl Iterator<Item = BoardCoord> + '_ {
-        assert!(col < BOARD_COLS);
-        (0..BOARD_ROWS)
-            .filter(move |row| is_empty == self.grid.get(*row, col).unwrap().is_none())
-            .map(move |row| (row, col))
-    }
-
-    /// Retrieves cells in the given row matching the specified emptiness.
-    ///
-    /// # Arguments
-    ///
-    /// * `is_empty` - whether the cell should be empty; search criteria
-    /// * `row` - the board row in which to search
-    fn get_cells_by_emptiness_row(
-        &self,
-        is_empty: bool,
-        row: usize,
-    ) -> impl Iterator<Item = BoardCoord> + '_ {
-        assert!(row < BOARD_ROWS);
-        (0..BOARD_COLS)
-            .filter(move |col| is_empty == self.grid.get(row, *col).unwrap().is_none())
-            .map(move |col| (row, col))
-    }
-
     /// Retrieves all cells matching the specified emptiness.
     ///
     /// # Arguments
     ///
     /// * `is_empty` - whether the cell should be empty; search criteria
     fn get_cells_by_emptiness(&self, is_empty: bool) -> impl Iterator<Item = BoardCoord> + '_ {
-        (0..BOARD_ROWS).flat_map(move |row| self.get_cells_by_emptiness_row(is_empty, row))
+        (0..BOARD_COLS)
+            .flat_map(|y| (0..BOARD_ROWS).map(move |x| (x, y)))
+            .filter(move |p| is_empty == self.grid.get(p.0, p.1).unwrap().is_none())
     }
 
     /// Attempts to spawn a new cell on the game board at the specified location.
