@@ -226,7 +226,43 @@ impl Board {
     }
 
     fn shift(&mut self, dir: Direction) -> Result<(), ()> {
-        todo!();
+        let mut copy = self.grid.clone();
+        let mut shifted = false;
+
+        match dir {
+            // TODO: determine an API modification to get the following commented-out code working
+            Direction::Up | Direction::Down => {
+                let mut columns = self.grid.columns_iter();
+                for col in columns {
+                    // if let Some(group) = Board::shift_group(col, dir) {
+                        // shifted = true;
+                        // ...
+                    // }
+                }
+            }
+            Direction::Left | Direction::Right => {
+                let mut rows = self.grid.rows_iter();
+                for row in rows {
+                    // if let Some(group) = Board::shift_group(row, dir) {
+                        // shifted = true;
+                        // ...
+                    // }
+                }
+            }
+        };
+
+        match shifted {
+            true => {
+                // push the unmodified copy into history
+                self.history.push(copy);
+                Ok(())
+            },
+            false => {
+                // revert the grid state to the unmodified copy
+                self.grid = copy;
+                Err(())
+            }
+        }
     }
 
     /// Handles movement on the game board.
