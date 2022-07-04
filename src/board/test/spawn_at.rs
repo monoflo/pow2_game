@@ -19,8 +19,10 @@ fn corner_bottom_right() {
     let mut board = Board::default();
     board.spawn_at_many(vec![(BOARD_ROWS - 1, BOARD_COLS - 1)]);
     let mut cells = board.grid.elements_row_major_iter();
+    for _ in 0..((BOARD_COLS * BOARD_ROWS) - 1) {
+        assert!(cells.next().unwrap().is_none());
+    }
     assert!(cells.next().unwrap().is_some());
-    assert!(cells.all(|cell| cell.is_none()));
 }
 
 /// Affirm that only the bottom-leftmost cell will be non-empty if a cell is spawned there.
